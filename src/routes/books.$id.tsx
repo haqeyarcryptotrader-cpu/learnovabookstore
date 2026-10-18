@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, BookOpen, Download, FileDown, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
-import { PAYMENT_DETAILS, fmtAfn, fmtUsd, priceFor, waLink, type Format } from "@/lib/books";
+import { z } from "zod";
+import { CITIES, PAYMENT_DETAILS, fmtAfn, fmtUsd, priceFor, waLink, type Format } from "@/lib/books";
 import { useStore } from "@/lib/store";
 import { BookCover } from "@/components/BookCover";
 import { FormatBadges } from "@/components/FormatBadges";
@@ -123,8 +124,8 @@ function FormatOption(p: { active: boolean; disabled: boolean; onClick: () => vo
   );
 }
 
-import { CITIES } from "@/lib/books";
-import { z } from "zod";
+
+
 
 const schema = z.object({
   name: z.string().trim().min(2, "Enter your name").max(80),
