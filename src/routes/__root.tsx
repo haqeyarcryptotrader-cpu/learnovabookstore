@@ -117,7 +117,7 @@ function RootComponent() {
           © Learnova Books Store · Kabul, Afghanistan · Hard copies delivered nationwide, PDFs worldwide
         </footer>
         <CartSheet />
-        <Toaster />
+        <Toaster position="top-center" />
       </StoreProvider>
     </QueryClientProvider>
   );
