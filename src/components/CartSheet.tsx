@@ -104,9 +104,9 @@ export function CartSheet() {
           {checkout && (
             <div className="space-y-3">
               <input className={field} placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={80} />
-              {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+              {errors["name"] && <p className="text-xs text-destructive">{errors["name"]}</p>}
               <input className={field} placeholder="WhatsApp / Phone (e.g. +93 7xx xxx xxx)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} maxLength={20} />
-              {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+              {errors["phone"] && <p className="text-xs text-destructive">{errors["phone"]}</p>}
               {hasHard && (
                 <div className="space-y-3 rounded-lg border p-3">
                   <p className="text-sm font-medium">Hard copy delivery · Cash on Delivery</p>
@@ -114,7 +114,7 @@ export function CartSheet() {
                     {CITIES.map((c) => <option key={c}>{c}</option>)}
                   </select>
                   <textarea className={field} rows={2} placeholder="Delivery address (district, street, landmark)" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} maxLength={300} />
-                  {errors.address && <p className="text-xs text-destructive">{errors.address}</p>}
+                  {errors["address"] && <p className="text-xs text-destructive">{errors["address"]}</p>}
                 </div>
               )}
               {hasSoft && (

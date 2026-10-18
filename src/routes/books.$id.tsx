@@ -140,7 +140,7 @@ function QuickHardOrder({ title, price }: { title: string; price: number }) {
   const field = "w-full rounded-md border bg-background px-3 py-2 text-sm";
   const send = () => {
     const r = schema.safeParse(v);
-    if (!r.success) { setErr(r.error.issues[0].message); return; }
+    if (!r.success) { setErr(r.error.issues[0]?.message ?? "Check the form"); return; }
     setErr("");
     const msg = `Assalamu Alaikum Learnova Books! I want to order:\n\nBook: ${title}\nFormat: Hard Copy\nPrice: ${fmtAfn(price)} (${fmtUsd(price)})\nPayment: Cash on Delivery\n\nName: ${v.name}\nWhatsApp/Phone: ${v.phone}\nCity/Province: ${v.city}\nDelivery Address: ${v.address}`;
     window.open(waLink(msg), "_blank");
