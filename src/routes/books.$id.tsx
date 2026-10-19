@@ -4,6 +4,7 @@ import { ArrowLeft, BookOpen, Download, FileDown, MessageCircle } from "lucide-r
 import { toast } from "sonner";
 import { z } from "zod";
 import { CITIES, PAYMENT_DETAILS, fmtAfn, fmtUsd, priceFor, waLink, type Format } from "@/lib/books";
+import { recordOrder } from "@/lib/db";
 import { useStore } from "@/lib/store";
 import { BookCover } from "@/components/BookCover";
 import { FormatBadges } from "@/components/FormatBadges";
@@ -144,6 +145,7 @@ function QuickHardOrder({ title, price }: { title: string; price: number }) {
     setErr("");
     const msg = `Assalamu Alaikum Learnova Books! I want to order:\n\nBook: ${title}\nFormat: Hard Copy\nPrice: ${fmtAfn(price)} (${fmtUsd(price)})\nPayment: Cash on Delivery\n\nName: ${v.name}\nWhatsApp/Phone: ${v.phone}\nCity/Province: ${v.city}\nDelivery Address: ${v.address}`;
     window.open(waLink(msg), "_blank");
+    void recordOrder({ customer_name: v.name, phone: v.phone, city: v.city, address: v.address, payment_method: "Cash on Delivery", items: [{ title, format: "hard", qty: 1, price }], total_afn: price });
   };
   return (
     <div className="mt-8 space-y-3 rounded-lg border bg-card p-5">

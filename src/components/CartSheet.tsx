@@ -3,6 +3,7 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { z } from "zod";
 import { CITIES, PAYMENT_DETAILS, fmtAfn, fmtUsd, priceFor, waLink } from "@/lib/books";
 import { useStore } from "@/lib/store";
+import { recordOrder } from "@/lib/db";
 import { BookCover } from "./BookCover";
 
 const hardSchema = z.object({
@@ -62,6 +63,13 @@ export function CartSheet() {
       ...(hasSoft ? [`Payment (soft copies): ${form.pay} — I will send the receipt here for verification.`] : []),
     ].join("\n");
     window.open(waLink(msg), "_blank");
+    void recordOrder({
+      customer_name: form.name, phone: form.phone,
+      city: hasHard ? form.city : "", address: hasHard ? form.address : "",
+      payment_method: [hasHard ? "Cash on Delivery" : "", hasSoft ? form.pay : ""].filter(Boolean).join(" + "),
+      items: lines.map((l) => ({ title: l.book.title, format: l.format, qty: l.qty, price: l.price })),
+      total_afn: total,
+    });
     clearCart();
     setCheckout(false);
     setCartOpen(false);

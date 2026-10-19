@@ -1,14 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { SEED_BOOKS, type Book, type Format } from "./books";
+import { fetchBooks, removeBook, upsertBook } from "./db";
 
 export interface CartItem { bookId: string; format: Format; qty: number }
 export type Lang = "en" | "fa" | "ps";
 
 interface Store {
   books: Book[];
-  saveBook: (b: Book) => void;
-  deleteBook: (id: string) => void;
-  resetBooks: () => void;
+  saveBook: (b: Book) => Promise<void>;
+  deleteBook: (id: string) => Promise<void>;
   cart: CartItem[];
   addToCart: (bookId: string, format: Format) => void;
   setQty: (bookId: string, format: Format, qty: number) => void;
@@ -40,15 +40,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>("en");
   const [ready, setReady] = useState(false);
 
+  const refresh = () => fetchBooks().then(setBooks).catch((e) => console.error("Could not load books", e));
+
   useEffect(() => {
-    setBooks(load("lnv-books", SEED_BOOKS));
+    refresh();
     setCart(load("lnv-cart", []));
     setDark(load("lnv-dark", false));
     setLang(load("lnv-lang", "en"));
     setReady(true);
   }, []);
 
-  useEffect(() => { if (ready) localStorage.setItem("lnv-books", JSON.stringify(books)); }, [books, ready]);
   useEffect(() => { if (ready) localStorage.setItem("lnv-cart", JSON.stringify(cart)); }, [cart, ready]);
   useEffect(() => { if (ready) localStorage.setItem("lnv-lang", JSON.stringify(lang)); }, [lang, ready]);
   useEffect(() => {
@@ -58,12 +59,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const value: Store = {
     books,
-    saveBook: (b) => setBooks((p) => (p.some((x) => x.id === b.id) ? p.map((x) => (x.id === b.id ? b : x)) : [b, ...p])),
-    deleteBook: (id) => {
-      setBooks((p) => p.filter((x) => x.id !== id));
+    saveBook: async (b) => { await upsertBook(b); await refresh(); },
+    deleteBook: async (id) => {
+      await removeBook(id);
       setCart((c) => c.filter((i) => i.bookId !== id));
+      await refresh();
     },
-    resetBooks: () => setBooks(SEED_BOOKS),
     cart,
     addToCart: (bookId, format) =>
       setCart((c) => {
