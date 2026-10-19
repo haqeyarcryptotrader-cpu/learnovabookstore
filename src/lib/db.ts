@@ -12,7 +12,7 @@ const fromRow = (r: Row): Book => ({
   hardPrice: r.hard_price == null ? null : Number(r.hard_price),
   softPrice: r.soft_price == null ? null : Number(r.soft_price),
   coverUrl: r.cover_url, description: r.description, inStock: r.in_stock,
-  pdfLink: r.pdf_link, samplePages: r.sample_pages ?? undefined,
+  pdfLink: r.pdf_link, ...(r.sample_pages ? { samplePages: r.sample_pages } : {}),
 });
 
 export async function fetchBooks(): Promise<Book[]> {
