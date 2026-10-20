@@ -1,0 +1,4 @@
+CREATE POLICY "admin read book storage" ON storage.objects FOR SELECT TO authenticated USING (bucket_id IN ('book-covers','book-files') AND public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admin upload book storage" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id IN ('book-covers','book-files') AND public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admin update book storage" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id IN ('book-covers','book-files') AND public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admin delete book storage" ON storage.objects FOR DELETE TO authenticated USING (bucket_id IN ('book-covers','book-files') AND public.has_role(auth.uid(), 'admin'));
