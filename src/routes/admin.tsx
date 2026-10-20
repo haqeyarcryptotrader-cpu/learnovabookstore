@@ -94,7 +94,7 @@ function Login() {
       {mode === "in" && (
         <button
           onClick={async () => {
-            if (!email) return toast.error("Enter your email above first. / لومړی خپل ایمیل ولیکئ.");
+            if (!email) { toast.error("Enter your email above first. / لومړی خپل ایمیل ولیکئ."); return; }
             const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/reset-password" });
             if (error) toast.error(error.message);
             else toast.success("Reset link sent — check your email. / د پاسورډ بدلولو لینک ستاسو ایمیل ته ولېږل شو.");
