@@ -88,9 +88,22 @@ function Login() {
           {busy ? "Please wait…" : mode === "in" ? "Sign in" : "Create account"}
         </button>
       </form>
-      <button onClick={() => setMode(mode === "in" ? "up" : "in")} className="mt-4 text-sm text-muted-foreground underline">
+      <button onClick={() => setMode(mode === "in" ? "up" : "in")} className="mt-4 block text-sm text-muted-foreground underline">
         {mode === "in" ? "No account yet? Create one" : "Already have an account? Sign in"}
       </button>
+      {mode === "in" && (
+        <button
+          onClick={async () => {
+            if (!email) { toast.error("Enter your email above first. / لومړی خپل ایمیل ولیکئ."); return; }
+            const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/reset-password" });
+            if (error) toast.error(error.message);
+            else toast.success("Reset link sent — check your email. / د پاسورډ بدلولو لینک ستاسو ایمیل ته ولېږل شو.");
+          }}
+          className="mt-2 block text-sm text-muted-foreground underline"
+        >
+          Forgot password? / پاسورډ مو هېر دی؟
+        </button>
+      )}
     </div>
   );
 }
