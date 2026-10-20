@@ -226,8 +226,12 @@ function Editor({ book, onClose, onSave }: { book: Book; onClose: () => void; on
           <L label="In stock (hard copy)">
             <label className="flex h-[38px] items-center gap-2 text-sm"><input type="checkbox" checked={b.inStock} onChange={(e) => setB({ ...b, inStock: e.target.checked })} /> Available</label>
           </L>
-          <div className="sm:col-span-2"><L label="Cover image URL (optional)"><input className={field} value={b.coverUrl} placeholder="https://…" onChange={(e) => setB({ ...b, coverUrl: e.target.value })} /></L></div>
-          <div className="sm:col-span-2"><L label="PDF / sample link (optional)"><input className={field} value={b.pdfLink} placeholder="https://…" onChange={(e) => setB({ ...b, pdfLink: e.target.value })} /></L></div>
+          <div className="sm:col-span-2">
+            <Uploader label="Cover image / د پوښ عکس" accept="image/*" bucket="book-covers" value={b.coverUrl} onChange={(url) => setB({ ...b, coverUrl: url })} preview />
+          </div>
+          <div className="sm:col-span-2">
+            <Uploader label="PDF file / پي ډي اف فایل" accept="application/pdf" bucket="book-files" value={b.pdfLink} onChange={(url) => setB({ ...b, pdfLink: url })} />
+          </div>
           <div className="sm:col-span-2"><L label="Description"><textarea rows={3} className={field} value={b.description} maxLength={1000} onChange={(e) => setB({ ...b, description: e.target.value })} /></L></div>
         </div>
         {err && <p className="mt-3 text-sm text-destructive">{err}</p>}
