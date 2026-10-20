@@ -247,3 +247,44 @@ function Editor({ book, onClose, onSave }: { book: Book; onClose: () => void; on
 function L({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="block space-y-1"><span className="text-xs text-muted-foreground">{label}</span>{children}</label>;
 }
+
+// Buckets are private (workspace blocks public ones), so we store a long-lived signed URL.
+const TEN_YEARS = 60 * 60 * 24 * 365 * 10;
+
+function Uploader({ label, accept, bucket, value, onChange, preview }: {
+  label: string; accept: string; bucket: string; value: string; onChange: (url: string) => void; preview?: boolean;
+}) {
+  const [busy, setBusy] = useState(false);
+  const pick = async (file?: File) => {
+    if (!file) return;
+    setBusy(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const up = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type });
+      if (up.error) throw up.error;
+      const signed = await supabase.storage.from(bucket).createSignedUrl(path, TEN_YEARS);
+      if (signed.error) throw signed.error;
+      onChange(signed.data.signedUrl);
+      toast.success("Uploaded / اپلوډ شو");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="space-y-1">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <div className="flex items-center gap-3 rounded-md border p-3">
+        {preview && value && <img src={value} alt="" className="h-16 w-11 rounded object-cover" />}
+        {!preview && value && <a href={value} target="_blank" rel="noreferrer" className="text-sm underline">Open PDF</a>}
+        <label className="cursor-pointer rounded-md bg-secondary px-3 py-2 text-sm">
+          {busy ? "Uploading… / اپلوډ کېږي" : value ? "Change / بدل کړئ" : "Choose file / فایل وټاکئ"}
+          <input type="file" accept={accept} className="hidden" disabled={busy} onChange={(e) => pick(e.target.files?.[0])} />
+        </label>
+        {value && <button type="button" onClick={() => onChange("")} className="text-sm text-destructive">Remove</button>}
+      </div>
+    </div>
+  );
+}
