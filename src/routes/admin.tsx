@@ -55,56 +55,82 @@ function AdminGate() {
   return <Admin email={session.user.email ?? ""} />;
 }
 
+function friendly(msg: string) {
+  const m = msg.toLowerCase();
+  if (m.includes("invalid login")) return "The email or password is incorrect.";
+  if (m.includes("not confirmed")) return "Please confirm your email first — check your inbox for our link.";
+  if (m.includes("already registered")) return "An account with this email already exists. Please sign in.";
+  if (m.includes("fetch") || m.includes("network")) return "Can't reach the server. Check your connection and try again.";
+  return msg;
+}
+
 function Login() {
   const [mode, setMode] = useState<"in" | "up">("in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
-  const field = "w-full rounded-md border bg-background px-3 py-2 text-sm";
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const field = "w-full rounded-md border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true);
+    setBusy(true); setError(""); setNotice("");
     if (mode === "in") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) toast.error(error.message);
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (error) setError(friendly(error.message));
     } else {
-      const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + "/admin" } });
-      if (error) toast.error(error.message);
-      else if (!data.session) toast.success("Check your email to confirm your account, then sign in.");
+      const { data, error } = await supabase.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: window.location.origin + "/admin" } });
+      if (error) setError(friendly(error.message));
+      else if (!data.session) { setNotice("Account created. Check your email and tap the confirmation link, then sign in."); setMode("in"); }
     }
     setBusy(false);
   };
 
+  const forgot = async () => {
+    setError(""); setNotice("");
+    if (!email.trim()) { setError("Enter your email address first."); return; }
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin + "/reset-password" });
+    if (error) setError(friendly(error.message)); else setNotice("A password reset link has been sent to your email.");
+  };
+
   return (
-    <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="font-display text-3xl">Admin {mode === "in" ? "sign in" : "sign up"}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {mode === "in" ? "Sign in to manage books and orders." : "The first account created becomes the store admin."}
-      </p>
-      <form onSubmit={submit} className="mt-6 space-y-3">
-        <input type="email" required placeholder="Email" className={field} value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input type="password" required minLength={6} placeholder="Password" className={field} value={password} onChange={(e) => setPassword(e.target.value)} />
-        <button disabled={busy} className="w-full rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-60">
-          {busy ? "Please wait…" : mode === "in" ? "Sign in" : "Create account"}
-        </button>
-      </form>
-      <button onClick={() => setMode(mode === "in" ? "up" : "in")} className="mt-4 block text-sm text-muted-foreground underline">
-        {mode === "in" ? "No account yet? Create one" : "Already have an account? Sign in"}
-      </button>
-      {mode === "in" && (
-        <button
-          onClick={async () => {
-            if (!email) { toast.error("Enter your email above first. / لومړی خپل ایمیل ولیکئ."); return; }
-            const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/reset-password" });
-            if (error) toast.error(error.message);
-            else toast.success("Reset link sent — check your email. / د پاسورډ بدلولو لینک ستاسو ایمیل ته ولېږل شو.");
-          }}
-          className="mt-2 block text-sm text-muted-foreground underline"
-        >
-          Forgot password? / پاسورډ مو هېر دی؟
-        </button>
-      )}
+    <div className="mx-auto max-w-md px-4 py-16">
+      <div className="rounded-xl border bg-card p-8 shadow-sm">
+        <h1 className="font-display text-3xl">{mode === "in" ? "Sign in" : "Create admin account"}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {mode === "in" ? "Welcome back. Sign in to manage your store." : "The first account created becomes the store admin."}
+        </p>
+        <form onSubmit={submit} className="mt-6 space-y-4">
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="text-sm font-medium">Email address</label>
+            <input id="email" type="email" autoComplete="email" required placeholder="you@example.com" className={field} value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label htmlFor="password" className="text-sm font-medium">Password</label>
+              {mode === "in" && <button type="button" onClick={forgot} className="text-xs text-primary hover:underline">Forgot password?</button>}
+            </div>
+            <input id="password" type={show ? "text" : "password"} autoComplete={mode === "in" ? "current-password" : "new-password"} required minLength={6} placeholder="At least 6 characters" className={field} value={password} onChange={(e) => setPassword(e.target.value)} />
+            <label className="flex items-center gap-2 pt-1 text-sm text-muted-foreground">
+              <input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} className="h-4 w-4" /> Show password
+            </label>
+          </div>
+          {error && <p role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
+          {notice && <p className="rounded-md border bg-muted px-3 py-2 text-sm">{notice}</p>}
+          <button disabled={busy} className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60">
+            {busy ? "Please wait…" : mode === "in" ? "Sign in" : "Create account"}
+          </button>
+          <p className="text-center text-xs text-muted-foreground">You'll stay signed in on this device until you sign out.</p>
+        </form>
+        <div className="mt-6 border-t pt-4 text-center text-sm text-muted-foreground">
+          {mode === "in" ? "Don't have an account?" : "Already have an account?"}{" "}
+          <button onClick={() => { setMode(mode === "in" ? "up" : "in"); setError(""); setNotice(""); }} className="font-medium text-primary hover:underline">
+            {mode === "in" ? "Create one" : "Sign in"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
