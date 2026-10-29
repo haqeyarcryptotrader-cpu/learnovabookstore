@@ -21,7 +21,7 @@ export interface Book {
 export const AFN_PER_USD = 70;
 export const WHATSAPP_NUMBER = "93765238918";
 export const PAYMENT_DETAILS = {
-  hesabpay: "HesabPay: +93 76 523 8918 (Learnova Books)",
+  hesabpay: "HesabPay: 079 614 2008 (Learnova Books)",
   hawala: "Hawala / Sarai Shahzada, Kabul — ask us on WhatsApp for the current agent",
   usdt: "USDT (TRC20): TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
 };
