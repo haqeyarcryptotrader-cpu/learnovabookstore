@@ -19,9 +19,9 @@ export interface Book {
 
 // Placeholder values — replace with the store's real details.
 export const AFN_PER_USD = 70;
-export const WHATSAPP_NUMBER = "93700000000";
+export const WHATSAPP_NUMBER = "93765238918";
 export const PAYMENT_DETAILS = {
-  hesabpay: "HesabPay: +93 700 000 000 (Learnova Books)",
+  hesabpay: "HesabPay: +93 76 523 8918 (Learnova Books)",
   hawala: "Hawala / Sarai Shahzada, Kabul — ask us on WhatsApp for the current agent",
   usdt: "USDT (TRC20): TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
 };
