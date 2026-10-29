@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { CATEGORIES, fmtAfn, fmtUsd, type Book } from "@/lib/books";
@@ -26,9 +27,9 @@ const WELCOME = {
 
 function Index() {
   const { books, lang } = useStore();
-  const [q, setQ] = useState("");
-  const [cat, setCat] = useState<string>("All");
-  const [fmt, setFmt] = useState<"all" | "hard" | "soft">("all");
+  const [q, setQ] = usePersistentState("lnv-q", "");
+  const [cat, setCat] = usePersistentState<string>("lnv-cat", "All");
+  const [fmt, setFmt] = usePersistentState<"all" | "hard" | "soft">("lnv-fmt", "all");
   const w = WELCOME[lang];
 
   const list = useMemo(() => {

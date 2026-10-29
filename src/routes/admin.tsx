@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 import { useEffect, useState } from "react";
 import { LogOut, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -147,8 +148,8 @@ function Orders() {
 
 function Admin({ email }: { email: string }) {
   const { books, saveBook, deleteBook } = useStore();
-  const [edit, setEdit] = useState<Book | null>(null);
-  const [tab, setTab] = useState<"books" | "orders">("books");
+  const [edit, setEdit] = usePersistentState<Book | null>("lnv-edit", null);
+  const [tab, setTab] = usePersistentState<"books" | "orders">("lnv-tab", "books");
 
   const tabBtn = (t: typeof tab, label: string) => (
     <button onClick={() => setTab(t)} className={`rounded-md px-4 py-2 text-sm ${tab === t ? "bg-primary text-primary-foreground" : "border"}`}>{label}</button>
@@ -199,7 +200,7 @@ function Admin({ email }: { email: string }) {
 }
 
 function Editor({ book, onClose, onSave }: { book: Book; onClose: () => void; onSave: (b: Book) => void }) {
-  const [b, setB] = useState(book);
+  const [b, setB] = usePersistentState("lnv-draft-" + (book.id || "new"), book);
   const [err, setErr] = useState("");
   const field = "w-full rounded-md border bg-background px-3 py-2 text-sm";
   const num = (s: string) => (s.trim() === "" ? null : Math.max(0, Number(s)) || 0);
