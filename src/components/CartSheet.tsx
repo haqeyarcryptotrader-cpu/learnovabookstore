@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { z } from "zod";
 import { CITIES, PAYMENT_DETAILS, fmtAfn, fmtUsd, priceFor, waLink } from "@/lib/books";
@@ -20,7 +21,7 @@ const softSchema = z.object({
 export function CartSheet() {
   const { cart, books, cartOpen, setCartOpen, setQty, clearCart } = useStore();
   const [checkout, setCheckout] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", city: "Kabul", address: "", pay: "HesabPay" });
+  const [form, setForm] = usePersistentState("lnv-buyer", { name: "", phone: "", city: "Kabul", address: "", pay: "HesabPay" });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const lines = cart

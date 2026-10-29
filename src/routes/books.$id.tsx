@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 import { useState } from "react";
 import { ArrowLeft, BookOpen, Download, FileDown, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -136,7 +137,7 @@ const schema = z.object({
 });
 
 function QuickHardOrder({ title, price }: { title: string; price: number }) {
-  const [v, setV] = useState({ name: "", phone: "", city: "Kabul", address: "" });
+  const [v, setV] = usePersistentState("lnv-quick", { name: "", phone: "", city: "Kabul", address: "" });
   const [err, setErr] = useState("");
   const field = "w-full rounded-md border bg-background px-3 py-2 text-sm";
   const send = () => {

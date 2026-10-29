@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 import { useEffect, useState } from "react";
 import { LogOut, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -147,8 +148,8 @@ function Orders() {
 
 function Admin({ email }: { email: string }) {
   const { books, saveBook, deleteBook } = useStore();
-  const [edit, setEdit] = useState<Book | null>(null);
-  const [tab, setTab] = useState<"books" | "orders">("books");
+  const [edit, setEdit] = usePersistentState<Book | null>("lnv-edit", null);
+  const [tab, setTab] = usePersistentState<"books" | "orders">("lnv-tab", "books");
 
   const tabBtn = (t: typeof tab, label: string) => (
     <button onClick={() => setTab(t)} className={`rounded-md px-4 py-2 text-sm ${tab === t ? "bg-primary text-primary-foreground" : "border"}`}>{label}</button>
@@ -199,7 +200,7 @@ function Admin({ email }: { email: string }) {
 }
 
 function Editor({ book, onClose, onSave }: { book: Book; onClose: () => void; onSave: (b: Book) => void }) {
-  const [b, setB] = useState(book);
+  const [b, setB] = usePersistentState("lnv-draft-" + (book.id || "new"), book);
   const [err, setErr] = useState("");
   const field = "w-full rounded-md border bg-background px-3 py-2 text-sm";
   const num = (s: string) => (s.trim() === "" ? null : Math.max(0, Number(s)) || 0);
@@ -208,7 +209,7 @@ function Editor({ book, onClose, onSave }: { book: Book; onClose: () => void; on
     if (!b.title.trim() || !b.author.trim()) return setErr("Title and author are required.");
     if (b.hardPrice == null && b.softPrice == null) return setErr("Set at least one price (hard or soft copy).");
     const id = b.id || b.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + Date.now().toString(36);
-    onSave({ ...b, id, title: b.title.trim(), author: b.author.trim() });
+    localStorage.removeItem("lnv-draft-" + (book.id || "new")); onSave({ ...b, id, title: b.title.trim(), author: b.author.trim() });
   };
 
   return (
@@ -236,7 +237,7 @@ function Editor({ book, onClose, onSave }: { book: Book; onClose: () => void; on
         </div>
         {err && <p className="mt-3 text-sm text-destructive">{err}</p>}
         <div className="mt-5 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-md border px-4 py-2 text-sm">Cancel</button>
+          <button onClick={() => { localStorage.removeItem("lnv-draft-" + (book.id || "new")); onClose(); }} className="rounded-md border px-4 py-2 text-sm">Cancel</button>
           <button onClick={submit} className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">Save</button>
         </div>
       </div>
