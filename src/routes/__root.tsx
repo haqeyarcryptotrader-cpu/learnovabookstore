@@ -113,8 +113,23 @@ function RootComponent() {
         <main className="min-h-[70vh]">
           <Outlet />
         </main>
-        <footer className="mt-16 border-t py-8 text-center text-sm text-muted-foreground">
-          © Learnova Books Store · Kabul, Afghanistan · Hard copies delivered nationwide, PDFs worldwide
+        <footer className="mt-16 border-t bg-card/50">
+          <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 text-sm sm:grid-cols-3">
+            <div>
+              <p className="font-display text-lg">Learnova Books</p>
+              <p className="mt-2 text-muted-foreground">Hard copies delivered across Afghanistan, PDFs worldwide.</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Link to="/" className="text-muted-foreground hover:text-foreground">Books · کتابونه</Link>
+              <Link to="/about" className="text-muted-foreground hover:text-foreground">About · زموږ په اړه</Link>
+              <Link to="/contact" className="text-muted-foreground hover:text-foreground">Contact · اړیکه</Link>
+            </div>
+            <div className="text-muted-foreground">
+              <p>WhatsApp: 0765 238 918</p>
+              <p>Kabul, Afghanistan</p>
+            </div>
+          </div>
+          <p className="border-t py-4 text-center text-xs text-muted-foreground">© {new Date().getFullYear()} Learnova Books Store</p>
         </footer>
         <CartSheet />
         <Toaster position="top-center" />
