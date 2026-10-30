@@ -1,3 +1,4 @@
+import logo from "@/assets/learnova-logo.png.asset.json";
 import { Link } from "@tanstack/react-router";
 import { Moon, ShoppingBag, Sun, Settings } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -9,7 +10,7 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
         <Link to="/" className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-md bg-primary font-display text-lg text-primary-foreground">L</span>
+          <img src={logo.url} alt="Learnova Books" className="h-10 w-10 rounded-md object-cover" />
           <span className="font-display text-lg leading-none sm:text-xl">Learnova <span className="text-primary">Books</span></span>
         </Link>
         <div className="flex items-center gap-1">
