@@ -23,7 +23,7 @@ export const WHATSAPP_NUMBER = "93765238918";
 export const PAYMENT_DETAILS = {
   hesabpay: "HesabPay: 079 614 2008 (Learnova Books)",
   hawala: "Hawala / Sarai Shahzada, Kabul — ask us on WhatsApp for the current agent",
-  usdt: "USDT (TRC20): TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  usdt: "Binance Pay ID: 1134915229 — or USDT (BEP-20 / BNB Smart Chain only): 0xb6049e72ca5f192dbb7f6a0ab39b0e3a63bd204a",
 };
 
 export const toUsd = (afn: number) => afn / AFN_PER_USD;
