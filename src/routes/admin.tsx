@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES, fmtAfn, fmtUsd, type Book, type Category } from "@/lib/books";
 import { useStore } from "@/lib/store";
 import { BookCover } from "@/components/BookCover";
+import { stampPdf } from "@/lib/watermark";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -141,6 +142,40 @@ interface Order {
   total_afn: number; status: string; created_at: string;
 }
 
+function StampTool() {
+  const { books } = useStore();
+  const withPdf = books.filter((b) => b.pdfLink);
+  const [bookId, setBookId] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [busy, setBusy] = useState(false);
+  const field = "w-full rounded-md border bg-background px-3 py-2 text-sm";
+  const go = async () => {
+    const b = withPdf.find((x) => x.id === bookId);
+    if (!b || name.trim().length < 2 || phone.trim().length < 9) { toast.error("Choose a book and enter name and phone"); return; }
+    setBusy(true);
+    try { await stampPdf(b.pdfLink, name, phone, b.title); toast.success("Stamped PDF downloaded — send it on WhatsApp"); }
+    catch (e) { toast.error((e as Error).message); }
+    finally { setBusy(false); }
+  };
+  return (
+    <div className="mt-6 max-w-lg space-y-3 rounded-lg border bg-card p-5">
+      <h2 className="font-semibold">Stamp a PDF with the buyer's name / د پېرودونکي په نوم مهر</h2>
+      <p className="text-xs text-muted-foreground">Every page gets the buyer's name and WhatsApp number. Write the name in English letters (e.g. Ahmad Khan).</p>
+      <select className={field} value={bookId} onChange={(e) => setBookId(e.target.value)}>
+        <option value="">Choose a book…</option>
+        {withPdf.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}
+      </select>
+      {withPdf.length === 0 && <p className="text-xs text-destructive">No book has a PDF file yet. Upload one in the Books tab.</p>}
+      <input className={field} placeholder="Buyer name (English letters)" value={name} maxLength={60} onChange={(e) => setName(e.target.value)} />
+      <input className={field} placeholder="Buyer WhatsApp number" value={phone} maxLength={20} onChange={(e) => setPhone(e.target.value)} />
+      <button disabled={busy} onClick={go} className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-60">
+        {busy ? "Stamping…" : "Create stamped PDF / مهر شوی PDF جوړ کړه"}
+      </button>
+    </div>
+  );
+}
+
 function Orders() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const load = () => supabase.from("orders").select("*").order("created_at", { ascending: false }).then(({ data }) => setOrders((data as unknown as Order[]) ?? []));
@@ -175,7 +210,7 @@ function Orders() {
 function Admin({ email }: { email: string }) {
   const { books, saveBook, deleteBook } = useStore();
   const [edit, setEdit] = usePersistentState<Book | null>("lnv-edit", null);
-  const [tab, setTab] = usePersistentState<"books" | "orders">("lnv-tab", "books");
+  const [tab, setTab] = usePersistentState<"books" | "orders" | "stamp">("lnv-tab", "books");
 
   const tabBtn = (t: typeof tab, label: string) => (
     <button onClick={() => setTab(t)} className={`rounded-md px-4 py-2 text-sm ${tab === t ? "bg-primary text-primary-foreground" : "border"}`}>{label}</button>
@@ -191,11 +226,12 @@ function Admin({ email }: { email: string }) {
         <div className="flex flex-wrap gap-2">
           {tabBtn("books", "Books")}
           {tabBtn("orders", "Orders")}
+          {tabBtn("stamp", "Stamp PDF / مهر")}
           <button onClick={() => supabase.auth.signOut()} className="inline-flex items-center gap-1 rounded-md border px-4 py-2 text-sm"><LogOut className="h-4 w-4" /> Sign out</button>
         </div>
       </div>
 
-      {tab === "orders" ? <Orders /> : (
+      {tab === "orders" ? <Orders /> : tab === "stamp" ? <StampTool /> : (
         <>
           <div className="mt-6 flex justify-end">
             <button onClick={() => setEdit({ ...empty })} className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"><Plus className="h-4 w-4" /> Add book</button>
