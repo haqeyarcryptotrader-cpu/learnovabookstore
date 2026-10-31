@@ -96,7 +96,9 @@ function BookCard({ book }: { book: Book }) {
       <div className="mt-3 space-y-1.5">
         <h3 className="font-display text-base leading-snug">{book.title}</h3>
         <p className="text-xs text-muted-foreground">{book.author}</p>
-        <p className="text-sm font-medium">from {fmtAfn(from)} <span className="font-normal text-muted-foreground">· {fmtUsd(from)}</span></p>
+        {from === 0
+          ? <p className="text-sm font-medium text-primary">Free PDF · وړیا</p>
+          : <p className="text-sm font-medium">from {fmtAfn(from)} <span className="font-normal text-muted-foreground">· {fmtUsd(from)}</span></p>}
         <FormatBadges book={book} />
       </div>
     </Link>

@@ -246,7 +246,7 @@ function Editor({ book, onClose, onSave }: { book: Book; onClose: () => void; on
           <L label="Title"><input className={field} value={b.title} maxLength={150} onChange={(e) => setB({ ...b, title: e.target.value })} /></L>
           <L label="Author"><input className={field} value={b.author} maxLength={120} onChange={(e) => setB({ ...b, author: e.target.value })} /></L>
           <L label="Hard copy price (AFN, blank = none)"><input type="number" min={0} className={field} value={b.hardPrice ?? ""} onChange={(e) => setB({ ...b, hardPrice: num(e.target.value) })} /></L>
-          <L label="Soft copy price (AFN, blank = none)"><input type="number" min={0} className={field} value={b.softPrice ?? ""} onChange={(e) => setB({ ...b, softPrice: num(e.target.value) })} /></L>
+          <L label="PDF price (AFN · 0 = free / وړیا · blank = no PDF)"><input type="number" min={0} className={field} value={b.softPrice ?? ""} onChange={(e) => setB({ ...b, softPrice: num(e.target.value) })} /></L>
           <L label="Category">
             <select className={field} value={b.category} onChange={(e) => setB({ ...b, category: e.target.value as Category })}>{CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select>
           </L>

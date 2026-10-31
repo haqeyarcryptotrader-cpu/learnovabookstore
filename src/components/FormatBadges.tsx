@@ -9,7 +9,11 @@ export function FormatBadges({ book }: { book: Book }) {
           <BookOpen className="h-3 w-3" /> Hard Copy Available
         </span>
       )}
-      {book.softPrice != null && (
+      {book.softPrice === 0 ? (
+        <span className="inline-flex items-center gap-1 rounded-full bg-whatsapp px-2 py-0.5 text-[11px] font-medium text-whatsapp-foreground">
+          <FileDown className="h-3 w-3" /> Free PDF · وړیا
+        </span>
+      ) : book.softPrice != null && (
         <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[11px] font-medium text-accent-foreground">
           <FileDown className="h-3 w-3" /> Digital PDF Available
         </span>

@@ -40,6 +40,7 @@ function BookPage() {
 
   const hardOk = book.hardPrice != null && book.inStock;
   const softOk = book.softPrice != null;
+  const isFree = book.softPrice === 0;
   const f: Format = format ?? (hardOk ? "hard" : "soft");
   const price = priceFor(book, f);
 
@@ -50,7 +51,6 @@ function BookPage() {
   };
 
   const downloadSample = () => {
-    if (book.pdfLink) { window.open(book.pdfLink, "_blank"); return; }
     const blob = new Blob([`${book.title}\nby ${book.author}\n\nSAMPLE\n\n${book.samplePages ?? book.description}\n\n— Learnova Books Store`], { type: "text/plain" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -77,10 +77,10 @@ function BookPage() {
             <FormatOption active={f === "hard"} disabled={!hardOk} onClick={() => setFormat("hard")} icon={<BookOpen className="h-5 w-5" />}
               title="Hard Copy" note={book.hardPrice == null ? "Not available" : !book.inStock ? "Out of stock" : "Physical delivery · Cash on delivery"} price={book.hardPrice} />
             <FormatOption active={f === "soft"} disabled={!softOk} onClick={() => setFormat("soft")} icon={<FileDown className="h-5 w-5" />}
-              title="Soft Copy (PDF)" note={softOk ? "Digital delivery after payment" : "Not available"} price={book.softPrice} />
+              title="Soft Copy (PDF)" note={!softOk ? "Not available" : isFree ? "Free — download instantly" : "Digital delivery after payment"} price={isFree ? null : book.softPrice} />
           </div>
 
-          {price != null && (hardOk || softOk) && (
+          {price != null && (hardOk || softOk) && !(f === "soft" && isFree) && (
             <button onClick={add} className="mt-6 w-full rounded-md bg-primary px-6 py-3 font-medium text-primary-foreground sm:w-auto">
               Add to cart · {fmtAfn(price)} / {fmtUsd(price)}
             </button>
@@ -88,7 +88,21 @@ function BookPage() {
 
           {f === "hard" && hardOk && <QuickHardOrder title={book.title} price={book.hardPrice!} />}
 
-          {f === "soft" && softOk && (
+          {f === "soft" && isFree && (
+            <div className="mt-8 space-y-3 rounded-lg border bg-card p-5">
+              <h3 className="font-semibold">Free PDF · وړیا پي ډي اف</h3>
+              <p className="text-sm text-muted-foreground">This book is free. Download it now — no payment needed.</p>
+              {book.pdfLink ? (
+                <a href={book.pdfLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground">
+                  <Download className="h-4 w-4" /> Download free PDF · ډاونلوډ
+                </a>
+              ) : (
+                <p className="text-sm text-destructive">The PDF file isn't uploaded yet.</p>
+              )}
+            </div>
+          )}
+
+          {f === "soft" && softOk && !isFree && (
             <div className="mt-8 space-y-4 rounded-lg border bg-card p-5">
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => setPreview((p) => !p)} className="rounded-md border px-4 py-2 text-sm">{preview ? "Hide preview" : "Read sample"}</button>
