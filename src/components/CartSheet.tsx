@@ -1,3 +1,4 @@
+import { useProfileAutofill } from "@/hooks/use-profile-autofill";
 import { useState } from "react";
 import { usePersistentState } from "@/hooks/use-persistent-state";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
@@ -22,6 +23,7 @@ export function CartSheet() {
   const { cart, books, cartOpen, setCartOpen, setQty, clearCart } = useStore();
   const [checkout, setCheckout] = useState(false);
   const [form, setForm] = usePersistentState("lnv-buyer", { name: "", phone: "", city: "Kabul", address: "", pay: "HesabPay" });
+  useProfileAutofill(setForm as never);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const lines = cart
