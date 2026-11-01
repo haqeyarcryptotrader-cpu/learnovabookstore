@@ -1,6 +1,6 @@
 import logo from "@/assets/learnova-logo.png.asset.json";
 import { Link } from "@tanstack/react-router";
-import { Moon, ShoppingBag, Sun, Settings, Menu, X } from "lucide-react";
+import { Moon, ShoppingBag, Sun, Settings, Menu, X, User } from "lucide-react";
 import { useState } from "react";
 
 const NAV = [
@@ -37,6 +37,9 @@ export function Header() {
               </button>
             ))}
           </div>
+          <Link to="/account" aria-label="My account" className="rounded-md p-2 text-muted-foreground hover:bg-muted">
+            <User className="h-5 w-5" />
+          </Link>
           <Link to="/admin" aria-label="Admin" className="rounded-md p-2 text-muted-foreground hover:bg-muted">
             <Settings className="h-5 w-5" />
           </Link>
