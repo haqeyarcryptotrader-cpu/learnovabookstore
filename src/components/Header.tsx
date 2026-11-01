@@ -1,7 +1,9 @@
 import logo from "@/assets/learnova-logo.png.asset.json";
 import { Link } from "@tanstack/react-router";
 import { Moon, ShoppingBag, Sun, Settings, Menu, X, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 
 const NAV = [
   { to: "/", label: "Books", ps: "کتابونه" },
@@ -13,7 +15,21 @@ import { useStore } from "@/lib/store";
 export function Header() {
   const { cart, setCartOpen, dark, toggleDark, lang, setLang } = useStore();
   const [open, setOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const count = cart.reduce((s, i) => s + i.qty, 0);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const user = data.session?.user;
+      if (!user) return;
+      supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data: ok }) => setIsAdmin(!!ok));
+    });
+    const { data } = supabase.auth.onAuthStateChange((_e, s) => {
+      setIsAdmin(false);
+      const user = s?.user;
+      if (user) supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data: ok }) => setIsAdmin(!!ok));
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
@@ -40,9 +56,11 @@ export function Header() {
           <Link to="/account" aria-label="My account" className="rounded-md p-2 text-muted-foreground hover:bg-muted">
             <User className="h-5 w-5" />
           </Link>
-          <Link to="/admin" aria-label="Admin" className="rounded-md p-2 text-muted-foreground hover:bg-muted">
-            <Settings className="h-5 w-5" />
-          </Link>
+          {isAdmin && (
+            <Link to="/admin" aria-label="Admin" className="rounded-md p-2 text-muted-foreground hover:bg-muted">
+              <Settings className="h-5 w-5" />
+            </Link>
+          )}
           <button onClick={toggleDark} aria-label="Toggle theme" className="rounded-md p-2 text-muted-foreground hover:bg-muted">
             {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
