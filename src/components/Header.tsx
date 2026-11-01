@@ -15,7 +15,21 @@ import { useStore } from "@/lib/store";
 export function Header() {
   const { cart, setCartOpen, dark, toggleDark, lang, setLang } = useStore();
   const [open, setOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const count = cart.reduce((s, i) => s + i.qty, 0);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const user = data.session?.user;
+      if (!user) return;
+      supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data: ok }) => setIsAdmin(!!ok));
+    });
+    const { data } = supabase.auth.onAuthStateChange((_e, s) => {
+      setIsAdmin(false);
+      const user = s?.user;
+      if (user) supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data: ok }) => setIsAdmin(!!ok));
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
