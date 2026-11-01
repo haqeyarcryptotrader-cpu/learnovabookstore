@@ -1,7 +1,9 @@
 import logo from "@/assets/learnova-logo.png.asset.json";
 import { Link } from "@tanstack/react-router";
 import { Moon, ShoppingBag, Sun, Settings, Menu, X, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 
 const NAV = [
   { to: "/", label: "Books", ps: "کتابونه" },
