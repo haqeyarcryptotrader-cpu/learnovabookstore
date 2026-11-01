@@ -43,6 +43,29 @@ export interface OrderInput {
 }
 
 export async function recordOrder(o: OrderInput) {
-  const { error } = await supabase.from("orders").insert(o);
+  const { data: { session } } = await supabase.auth.getSession();
+  const { error } = await supabase.from("orders").insert({ ...o, user_id: session?.user.id ?? null });
   if (error) console.error("Order not saved", error);
+}
+
+export interface Profile { id: string; full_name: string; phone: string; city: string; address: string }
+
+export async function fetchMyProfile(): Promise<Profile | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data } = await supabase.from("profiles").select("id,full_name,phone,city,address").eq("id", user.id).maybeSingle();
+  return data ?? { id: user.id, full_name: "", phone: "", city: "Kabul", address: "" };
+}
+
+export async function saveMyProfile(p: Profile) {
+  const { error } = await supabase.from("profiles").upsert(p);
+  if (error) throw error;
+}
+
+export async function fetchMyOrders() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data, error } = await supabase.from("orders").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+  if (error) throw error;
+  return data;
 }
