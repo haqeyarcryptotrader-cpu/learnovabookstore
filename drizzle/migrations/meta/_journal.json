@@ -15,6 +15,13 @@
       "when": 1792485079743,
       "tag": "0001_book_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793524786662,
+      "tag": "0002_customer_accounts",
+      "breakpoints": true
     }
   ]
 }

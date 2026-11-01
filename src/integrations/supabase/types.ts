@@ -71,6 +71,7 @@ export type Database = {
           phone: string
           status: string
           total_afn: number
+          user_id: string | null
         }
         Insert: {
           address?: string
@@ -83,6 +84,7 @@ export type Database = {
           phone: string
           status?: string
           total_afn?: number
+          user_id?: string | null
         }
         Update: {
           address?: string
@@ -95,6 +97,34 @@ export type Database = {
           phone?: string
           status?: string
           total_afn?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          full_name: string
+          id: string
+          phone: string
+        }
+        Insert: {
+          address?: string
+          city?: string
+          created_at?: string
+          full_name?: string
+          id: string
+          phone?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string
         }
         Relationships: []
       }
