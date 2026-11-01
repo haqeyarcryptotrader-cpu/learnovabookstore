@@ -56,9 +56,11 @@ export function Header() {
           <Link to="/account" aria-label="My account" className="rounded-md p-2 text-muted-foreground hover:bg-muted">
             <User className="h-5 w-5" />
           </Link>
-          <Link to="/admin" aria-label="Admin" className="rounded-md p-2 text-muted-foreground hover:bg-muted">
-            <Settings className="h-5 w-5" />
-          </Link>
+          {isAdmin && (
+            <Link to="/admin" aria-label="Admin" className="rounded-md p-2 text-muted-foreground hover:bg-muted">
+              <Settings className="h-5 w-5" />
+            </Link>
+          )}
           <button onClick={toggleDark} aria-label="Toggle theme" className="rounded-md p-2 text-muted-foreground hover:bg-muted">
             {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
