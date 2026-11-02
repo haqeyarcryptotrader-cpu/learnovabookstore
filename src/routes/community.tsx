@@ -98,6 +98,7 @@ function Composer({ userId, name, onPosted }: { userId: string; name: string; on
   const [preview, setPreview] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [done, setDone] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function pick(f: File | null) {
@@ -143,6 +144,7 @@ function Composer({ userId, name, onPosted }: { userId: string; name: string; on
         </div>
       )}
       {err && <p className="mt-2 text-sm text-destructive">{err}</p>}
+      {done && <p className="mt-2 rounded-md border bg-muted px-3 py-2 text-sm">Posted! It will appear here once the admin approves it. · پوسټ شو! د امین له تایید وروسته به دلته ښکاري.</p>}
       <div className="mt-3 flex items-center justify-between">
         <input ref={inputRef} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0] ?? null)} />
         <button onClick={() => inputRef.current?.click()} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
@@ -204,6 +206,9 @@ function PostCard({ post, userId, myName, isAdmin, likes, comments, onChange }: 
           <p className="text-sm font-medium">{post.author_name || "Reader"}</p>
           <p className="text-xs text-muted-foreground">{timeAgo(post.created_at)}</p>
         </div>
+        {post.status === "pending" && (
+          <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-600 dark:text-amber-400">Awaiting approval · د تایید په انتظار</span>
+        )}
         {(userId === post.user_id || isAdmin) && (
           <button onClick={del} aria-label="Delete post" className="rounded-md p-2 text-muted-foreground hover:bg-muted"><Trash2 className="h-4 w-4" /></button>
         )}
