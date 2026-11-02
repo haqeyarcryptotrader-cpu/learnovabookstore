@@ -142,6 +142,70 @@ interface Order {
   total_afn: number; status: string; created_at: string;
 }
 
+interface CommunityPost {
+  id: string; user_id: string; author_name: string; content: string;
+  image_url: string; status: string; created_at: string;
+}
+
+function PostReview() {
+  const [posts, setPosts] = useState<CommunityPost[] | null>(null);
+  const load = () =>
+    supabase.from("community_posts").select("*").order("created_at", { ascending: false })
+      .then(({ data }) => setPosts((data as unknown as CommunityPost[]) ?? []));
+  useEffect(() => { load(); }, []);
+
+  const approve = async (id: string) => {
+    const { error } = await supabase.from("community_posts").update({ status: "approved" }).eq("id", id);
+    if (error) toast.error(error.message); else { toast.success("Post approved / پوسټ تایید شو"); load(); }
+  };
+  const remove = async (id: string) => {
+    if (!confirm("Delete this post? · دا پوسټ حذف شي؟")) return;
+    const { error } = await supabase.from("community_posts").delete().eq("id", id);
+    if (error) toast.error(error.message); else load();
+  };
+
+  if (!posts) return <p className="p-8 text-center text-muted-foreground">Loading posts…</p>;
+  const pending = posts.filter((p) => p.status === "pending");
+  const approved = posts.filter((p) => p.status === "approved");
+  const Card = ({ p }: { p: CommunityPost }) => (
+    <div className="rounded-lg border bg-card p-4 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-medium">{p.author_name || "Reader"}</p>
+        <p className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleString()}</p>
+      </div>
+      {p.content && <p className="mt-2 whitespace-pre-wrap leading-relaxed" dir="auto">{p.content}</p>}
+      {p.image_url && <img src={p.image_url} alt="" className="mt-2 max-h-64 rounded-md object-cover" />}
+      <div className="mt-3 flex gap-2">
+        {p.status === "pending" && (
+          <button onClick={() => approve(p.id)} className="rounded-md bg-primary px-4 py-1.5 text-xs text-primary-foreground">Approve / تایید</button>
+        )}
+        <button onClick={() => remove(p.id)} className="rounded-md border border-destructive/40 px-4 py-1.5 text-xs text-destructive">Delete / حذف</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="mt-6 space-y-6">
+      <section>
+        <h2 className="font-semibold">Pending approval · د تایید په انتظار ({pending.length})</h2>
+        {pending.length === 0 ? (
+          <p className="mt-3 rounded-lg border p-6 text-center text-sm text-muted-foreground">No posts waiting for approval. · هیڅ پوسټ په انتظار نه دی.</p>
+        ) : (
+          <div className="mt-3 space-y-3">{pending.map((p) => <Card key={p.id} p={p} />)}</div>
+        )}
+      </section>
+      <section>
+        <h2 className="font-semibold">Published · خپره شوي ({approved.length})</h2>
+        {approved.length === 0 ? (
+          <p className="mt-3 rounded-lg border p-6 text-center text-sm text-muted-foreground">No published posts yet.</p>
+        ) : (
+          <div className="mt-3 space-y-3">{approved.map((p) => <Card key={p.id} p={p} />)}</div>
+        )}
+      </section>
+    </div>
+  );
+}
+
 function StampTool() {
   const { books } = useStore();
   const withPdf = books.filter((b) => b.pdfLink);
@@ -210,7 +274,7 @@ function Orders() {
 function Admin({ email }: { email: string }) {
   const { books, saveBook, deleteBook } = useStore();
   const [edit, setEdit] = usePersistentState<Book | null>("lnv-edit", null);
-  const [tab, setTab] = usePersistentState<"books" | "orders" | "stamp">("lnv-tab", "books");
+  const [tab, setTab] = usePersistentState<"books" | "orders" | "stamp" | "posts">("lnv-tab", "books");
 
   const tabBtn = (t: typeof tab, label: string) => (
     <button onClick={() => setTab(t)} className={`rounded-md px-4 py-2 text-sm ${tab === t ? "bg-primary text-primary-foreground" : "border"}`}>{label}</button>
