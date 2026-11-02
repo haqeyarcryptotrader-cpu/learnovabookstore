@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const NAV = [
   { to: "/", label: "Books", ps: "کتابونه" },
+  { to: "/community", label: "Community", ps: "ټولنه" },
   { to: "/about", label: "About", ps: "زموږ په اړه" },
   { to: "/contact", label: "Contact", ps: "اړیکه" },
 ] as const;
