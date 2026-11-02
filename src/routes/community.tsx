@@ -18,7 +18,7 @@ export const Route = createFileRoute("/community")({
   component: CommunityPage,
 });
 
-type Post = { id: string; user_id: string; author_name: string; content: string; image_url: string; created_at: string };
+type Post = { id: string; user_id: string; author_name: string; content: string; image_url: string; created_at: string; status: string };
 type Comment = { id: string; post_id: string; user_id: string; author_name: string; content: string; created_at: string };
 type Like = { post_id: string; user_id: string };
 
@@ -107,7 +107,7 @@ function Composer({ userId, name, onPosted }: { userId: string; name: string; on
 
   async function submit() {
     if (!text.trim() && !file) return;
-    setBusy(true); setErr("");
+    setBusy(true); setErr(""); setDone(false);
     try {
       let image_url = "";
       if (file) {
@@ -120,7 +120,7 @@ function Composer({ userId, name, onPosted }: { userId: string; name: string; on
       }
       const { error } = await supabase.from("community_posts").insert({ user_id: userId, author_name: name, content: text.trim(), image_url });
       if (error) throw error;
-      setText(""); pick(null); onPosted();
+      setText(""); pick(null); setDone(true); onPosted();
     } catch (e) {
       setErr("Could not post. Please try again. · پوسټ ونشو، بیا هڅه وکړئ.");
       console.error(e);
