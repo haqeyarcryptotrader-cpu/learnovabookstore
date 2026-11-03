@@ -36,6 +36,13 @@
       "when": 1793611523723,
       "tag": "0004_community_post_approval",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793698015192,
+      "tag": "0005_book_reviews",
+      "breakpoints": true
     }
   ]
 }
