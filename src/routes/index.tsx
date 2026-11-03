@@ -6,6 +6,7 @@ import { CATEGORIES, fmtAfn, fmtUsd, type Book } from "@/lib/books";
 import { useStore } from "@/lib/store";
 import { BookCover } from "@/components/BookCover";
 import { FormatBadges } from "@/components/FormatBadges";
+import { PostBar } from "@/components/PostComposer";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,7 +53,10 @@ function Index() {
         </div>
       </section>
 
+      <PostBar className="mx-auto max-w-6xl px-4 pt-6" />
+
       <section className="mx-auto max-w-6xl px-4 py-8">
+
         <div className="flex flex-col gap-3 md:flex-row">
           <label className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

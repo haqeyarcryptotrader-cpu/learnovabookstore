@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Heart, MessageCircle, Share2, ImagePlus, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Heart, MessageCircle, Share2, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Avatar, Composer } from "@/components/PostComposer";
 
 export const Route = createFileRoute("/community")({
   ssr: false,
@@ -92,76 +93,6 @@ function CommunityPage() {
   );
 }
 
-function Composer({ userId, name, onPosted }: { userId: string; name: string; onPosted: () => void }) {
-  const [text, setText] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
-  const [done, setDone] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  function pick(f: File | null) {
-    setFile(f);
-    setPreview(f ? URL.createObjectURL(f) : "");
-  }
-
-  async function submit() {
-    if (!text.trim() && !file) return;
-    setBusy(true); setErr(""); setDone(false);
-    try {
-      let image_url = "";
-      if (file) {
-        const path = `${userId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
-        const up = await supabase.storage.from("post-images").upload(path, file);
-        if (up.error) throw up.error;
-        const s = await supabase.storage.from("post-images").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-        if (s.error) throw s.error;
-        image_url = s.data.signedUrl;
-      }
-      const { error } = await supabase.from("community_posts").insert({ user_id: userId, author_name: name, content: text.trim(), image_url });
-      if (error) throw error;
-      setText(""); pick(null); setDone(true); onPosted();
-    } catch (e) {
-      setErr("Could not post. Please try again. · پوسټ ونشو، بیا هڅه وکړئ.");
-      console.error(e);
-    } finally { setBusy(false); }
-  }
-
-  return (
-    <div className="mt-6 rounded-xl border bg-card p-4">
-      <div className="flex items-center gap-3">
-        <Avatar name={name} />
-        <span className="text-sm font-medium">{name}</span>
-      </div>
-      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3}
-        placeholder="What's on your mind? · څه فکر کوئ؟"
-        className="mt-3 w-full resize-none rounded-md border bg-background p-3 text-sm outline-none focus:ring-2 focus:ring-ring" />
-      {preview && (
-        <div className="relative mt-2">
-          <img src={preview} alt="" className="max-h-80 w-full rounded-md object-cover" />
-          <button onClick={() => pick(null)} aria-label="Remove image" className="absolute right-2 top-2 rounded-full bg-background/90 p-1"><X className="h-4 w-4" /></button>
-        </div>
-      )}
-      {err && <p className="mt-2 text-sm text-destructive">{err}</p>}
-      {done && <p className="mt-2 rounded-md border bg-muted px-3 py-2 text-sm">Posted! It will appear here once the admin approves it. · پوسټ شو! د امین له تایید وروسته به دلته ښکاري.</p>}
-      <div className="mt-3 flex items-center justify-between">
-        <input ref={inputRef} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0] ?? null)} />
-        <button onClick={() => inputRef.current?.click()} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
-          <ImagePlus className="h-5 w-5 text-primary" /> Photo · عکس
-        </button>
-        <button onClick={submit} disabled={busy || (!text.trim() && !file)}
-          className="rounded-md bg-primary px-5 py-2 text-sm text-primary-foreground disabled:opacity-50">
-          {busy ? "Posting…" : "Post · خپرول"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Avatar({ name }: { name: string }) {
-  return <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/15 font-medium text-primary">{(name || "?").charAt(0).toUpperCase()}</div>;
-}
 
 function PostCard({ post, userId, myName, isAdmin, likes, comments, onChange }: {
   post: Post; userId: string | null; myName: string; isAdmin: boolean; likes: Like[]; comments: Comment[]; onChange: () => void;
