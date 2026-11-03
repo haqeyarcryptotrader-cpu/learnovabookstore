@@ -56,10 +56,6 @@ function Index() {
       <PostBar className="mx-auto max-w-6xl px-4 pt-6" />
 
       <section className="mx-auto max-w-6xl px-4 py-8">
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="font-display text-xl sm:text-2xl">Community · ټولنه</h2>
-          <Link to="/community" className="text-sm text-primary hover:underline">See all posts · ټول پوسټونه</Link>
-        </div>
 
         <div className="flex flex-col gap-3 md:flex-row">
           <label className="relative flex-1">
