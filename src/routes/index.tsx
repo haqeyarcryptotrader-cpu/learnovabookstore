@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { usePersistentState } from "@/hooks/use-persistent-state";
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { CATEGORIES, fmtAfn, fmtUsd, type Book } from "@/lib/books";
+import { CATEGORIES, fmtAfn, fmtUsd, normalizeCategory, type Book } from "@/lib/books";
 import { useStore } from "@/lib/store";
 import { BookCover } from "@/components/BookCover";
 import { FormatBadges } from "@/components/FormatBadges";
@@ -15,6 +15,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Buy hard copy books delivered across Afghanistan or instant PDF soft copies. Tech, crypto, self-help, Islamic history and literature." },
       { property: "og:title", content: "Learnova Books Store — Afghan Online Bookstore" },
       { property: "og:description", content: "Hard copies delivered to Kabul, Herat, Mazar and beyond — or instant PDF soft copies." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Index,
@@ -29,7 +31,8 @@ const WELCOME = {
 function Index() {
   const { books, lang } = useStore();
   const [q, setQ] = usePersistentState("lnv-q", "");
-  const [cat, setCat] = usePersistentState<string>("lnv-cat", "All");
+  const [savedCat, setCat] = usePersistentState<string>("lnv-cat", "All");
+  const cat = savedCat === "All" ? "All" : normalizeCategory(savedCat);
   const [fmt, setFmt] = usePersistentState<"all" | "hard" | "soft">("lnv-fmt", "all");
   const w = WELCOME[lang];
 

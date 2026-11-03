@@ -1,5 +1,22 @@
-export type Category = "Tech & AI" | "Crypto & Finance" | "Self-Help" | "Islamic & History" | "Literature";
-export const CATEGORIES: Category[] = ["Tech & AI", "Crypto & Finance", "Self-Help", "Islamic & History", "Literature"];
+export const CATEGORIES = [
+  "Computer Science", "Psychology", "Philosophy", "Self- development",
+  "Languages and literature", "Engineering", "Medical", "Teacher guide",
+  "Science", "Comic", "Children", "Arts and Music", "Religion",
+  "Mathematics", "Law", "Economics",
+] as const;
+export type Category = (typeof CATEGORIES)[number];
+
+const LEGACY_CATEGORIES: Record<string, Category> = {
+  "Tech & AI": "Computer Science",
+  "Crypto & Finance": "Economics",
+  "Self-Help": "Self- development",
+  "Islamic & History": "Religion",
+  Literature: "Languages and literature",
+};
+
+export function normalizeCategory(category: string): Category {
+  return CATEGORIES.find((option) => option === category) ?? LEGACY_CATEGORIES[category] ?? "Languages and literature";
+}
 export const CITIES = ["Kabul", "Herat", "Mazar-i-Sharif", "Kandahar", "Jalalabad", "Kunduz", "Ghazni", "Bamyan", "Khost", "Other"];
 export type Format = "hard" | "soft";
 
@@ -39,7 +56,7 @@ export const SEED_BOOKS: Book[] = [
     id: "bitcoin-standard",
     title: "The Bitcoin Standard",
     author: "Saifedean Ammous",
-    category: "Crypto & Finance",
+    category: "Economics",
     hardPrice: 1450,
     softPrice: 350,
     coverUrl: "",
@@ -52,7 +69,7 @@ export const SEED_BOOKS: Book[] = [
     id: "ai-superpowers",
     title: "AI Superpowers",
     author: "Kai-Fu Lee",
-    category: "Tech & AI",
+    category: "Computer Science",
     hardPrice: 1300,
     softPrice: 300,
     coverUrl: "",
@@ -65,7 +82,7 @@ export const SEED_BOOKS: Book[] = [
     id: "atomic-habits",
     title: "Atomic Habits",
     author: "James Clear",
-    category: "Self-Help",
+    category: "Self- development",
     hardPrice: 1100,
     softPrice: 250,
     coverUrl: "",
@@ -78,7 +95,7 @@ export const SEED_BOOKS: Book[] = [
     id: "kite-runner",
     title: "The Kite Runner",
     author: "Khaled Hosseini",
-    category: "Literature",
+    category: "Languages and literature",
     hardPrice: 950,
     softPrice: null,
     coverUrl: "",
@@ -90,7 +107,7 @@ export const SEED_BOOKS: Book[] = [
     id: "rumi-masnavi",
     title: "Selections from the Masnavi",
     author: "Mawlana Jalaluddin Balkhi (Rumi)",
-    category: "Literature",
+    category: "Languages and literature",
     hardPrice: 1200,
     softPrice: 200,
     coverUrl: "",
@@ -103,7 +120,7 @@ export const SEED_BOOKS: Book[] = [
     id: "lost-islamic-history",
     title: "Lost Islamic History",
     author: "Firas Alkhateeb",
-    category: "Islamic & History",
+    category: "Religion",
     hardPrice: 1150,
     softPrice: 280,
     coverUrl: "",
@@ -116,7 +133,7 @@ export const SEED_BOOKS: Book[] = [
     id: "rich-dad",
     title: "Rich Dad Poor Dad",
     author: "Robert T. Kiyosaki",
-    category: "Crypto & Finance",
+    category: "Economics",
     hardPrice: 900,
     softPrice: 200,
     coverUrl: "",
@@ -129,7 +146,7 @@ export const SEED_BOOKS: Book[] = [
     id: "clean-code",
     title: "Clean Code",
     author: "Robert C. Martin",
-    category: "Tech & AI",
+    category: "Computer Science",
     hardPrice: null,
     softPrice: 400,
     coverUrl: "",

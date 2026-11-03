@@ -8,6 +8,8 @@ export const Route = createFileRoute("/about")({
       { name: "description", content: "Learnova Books brings tech, crypto, self-help, Islamic and literature books to Afghanistan as hard copies and PDFs." },
       { property: "og:title", content: "About Learnova Books Store" },
       { property: "og:description", content: "An Afghan online bookstore for hard copies and instant PDF soft copies." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: About,

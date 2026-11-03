@@ -18,6 +18,8 @@ export const Route = createFileRoute("/books/$id")({
       { name: "description", content: "Choose hard copy delivery or an instant PDF soft copy at Learnova Books Store." },
       { property: "og:title", content: "Book details — Learnova Books Store" },
       { property: "og:description", content: "Hard copy delivery across Afghanistan or instant PDF download." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: BookPage,
