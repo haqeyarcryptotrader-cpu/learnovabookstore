@@ -9,6 +9,8 @@ export const Route = createFileRoute("/contact")({
       { name: "description", content: "Contact Learnova Books on WhatsApp 0765238918, see payment options and answers to common questions." },
       { property: "og:title", content: "Contact Learnova Books Store" },
       { property: "og:description", content: "WhatsApp, payment options and FAQ for Learnova Books." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Contact,
