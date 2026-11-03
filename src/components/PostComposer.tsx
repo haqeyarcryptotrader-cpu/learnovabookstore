@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ImagePlus, PenLine, X } from "lucide-react";
-import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function Avatar({ name }: { name: string }) {
