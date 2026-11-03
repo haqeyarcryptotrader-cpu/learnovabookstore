@@ -1,5 +1,22 @@
-export type Category = "Tech & AI" | "Crypto & Finance" | "Self-Help" | "Islamic & History" | "Literature";
-export const CATEGORIES: Category[] = ["Tech & AI", "Crypto & Finance", "Self-Help", "Islamic & History", "Literature"];
+export const CATEGORIES = [
+  "Computer Science", "Psychology", "Philosophy", "Self- development",
+  "Languages and literature", "Engineering", "Medical", "Teacher guide",
+  "Science", "Comic", "Children", "Arts and Music", "Religion",
+  "Mathematics", "Law", "Economics",
+] as const;
+export type Category = (typeof CATEGORIES)[number];
+
+const LEGACY_CATEGORIES: Record<string, Category> = {
+  "Tech & AI": "Computer Science",
+  "Crypto & Finance": "Economics",
+  "Self-Help": "Self- development",
+  "Islamic & History": "Religion",
+  Literature: "Languages and literature",
+};
+
+export function normalizeCategory(category: string): Category {
+  return CATEGORIES.find((option) => option === category) ?? LEGACY_CATEGORIES[category] ?? "Languages and literature";
+}
 export const CITIES = ["Kabul", "Herat", "Mazar-i-Sharif", "Kandahar", "Jalalabad", "Kunduz", "Ghazni", "Bamyan", "Khost", "Other"];
 export type Format = "hard" | "soft";
 

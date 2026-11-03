@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Book, Category } from "./books";
+import { normalizeCategory, type Book } from "./books";
 
 type Row = {
   id: string; title: string; author: string; category: string;
@@ -8,7 +8,7 @@ type Row = {
 };
 
 const fromRow = (r: Row): Book => ({
-  id: r.id, title: r.title, author: r.author, category: r.category as Category,
+  id: r.id, title: r.title, author: r.author, category: normalizeCategory(r.category),
   hardPrice: r.hard_price == null ? null : Number(r.hard_price),
   softPrice: r.soft_price == null ? null : Number(r.soft_price),
   coverUrl: r.cover_url, description: r.description, inStock: r.in_stock,

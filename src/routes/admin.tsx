@@ -5,7 +5,7 @@ import { LogOut, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { CATEGORIES, fmtAfn, fmtUsd, type Book, type Category } from "@/lib/books";
+import { CATEGORIES, fmtAfn, fmtUsd, normalizeCategory, type Book } from "@/lib/books";
 import { useStore } from "@/lib/store";
 import { BookCover } from "@/components/BookCover";
 import { stampPdf } from "@/lib/watermark";
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminGate,
 });
 
-const empty: Book = { id: "", title: "", author: "", category: "Tech & AI", hardPrice: null, softPrice: null, coverUrl: "", description: "", inStock: true, pdfLink: "" };
+const empty: Book = { id: "", title: "", author: "", category: "Computer Science", hardPrice: null, softPrice: null, coverUrl: "", description: "", inStock: true, pdfLink: "" };
 
 function AdminGate() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
@@ -336,7 +336,7 @@ function Editor({ book, onClose, onSave }: { book: Book; onClose: () => void; on
     if (!b.title.trim() || !b.author.trim()) return setErr("Title and author are required.");
     if (b.hardPrice == null && b.softPrice == null) return setErr("Set at least one price (hard or soft copy).");
     const id = b.id || b.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + Date.now().toString(36);
-    localStorage.removeItem("lnv-draft-" + (book.id || "new")); onSave({ ...b, id, title: b.title.trim(), author: b.author.trim() });
+    localStorage.removeItem("lnv-draft-" + (book.id || "new")); onSave({ ...b, id, category: normalizeCategory(b.category), title: b.title.trim(), author: b.author.trim() });
   };
 
   return (
@@ -349,7 +349,7 @@ function Editor({ book, onClose, onSave }: { book: Book; onClose: () => void; on
           <L label="Hard copy price (AFN, blank = none)"><input type="number" min={0} className={field} value={b.hardPrice ?? ""} onChange={(e) => setB({ ...b, hardPrice: num(e.target.value) })} /></L>
           <L label="PDF price (AFN · 0 = free / وړیا · blank = no PDF)"><input type="number" min={0} className={field} value={b.softPrice ?? ""} onChange={(e) => setB({ ...b, softPrice: num(e.target.value) })} /></L>
           <L label="Category">
-            <select className={field} value={b.category} onChange={(e) => setB({ ...b, category: e.target.value as Category })}>{CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select>
+            <select className={field} value={normalizeCategory(b.category)} onChange={(e) => setB({ ...b, category: normalizeCategory(e.target.value) })}>{CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select>
           </L>
           <L label="In stock (hard copy)">
             <label className="flex h-[38px] items-center gap-2 text-sm"><input type="checkbox" checked={b.inStock} onChange={(e) => setB({ ...b, inStock: e.target.checked })} /> Available</label>

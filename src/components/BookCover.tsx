@@ -2,11 +2,22 @@ import type { Book } from "@/lib/books";
 import { cn } from "@/lib/utils";
 
 const PALETTES: Record<string, string> = {
-  "Tech & AI": "cover-tech",
-  "Crypto & Finance": "cover-crypto",
-  "Self-Help": "cover-self",
-  "Islamic & History": "cover-history",
-  Literature: "cover-lit",
+  "Computer Science": "cover-tech",
+  Psychology: "cover-self",
+  Philosophy: "cover-history",
+  "Self- development": "cover-self",
+  "Languages and literature": "cover-lit",
+  Engineering: "cover-tech",
+  Medical: "cover-history",
+  "Teacher guide": "cover-self",
+  Science: "cover-tech",
+  Comic: "cover-crypto",
+  Children: "cover-self",
+  "Arts and Music": "cover-lit",
+  Religion: "cover-history",
+  Mathematics: "cover-tech",
+  Law: "cover-lit",
+  Economics: "cover-crypto",
 };
 
 export function BookCover({ book, className }: { book: Book; className?: string }) {
