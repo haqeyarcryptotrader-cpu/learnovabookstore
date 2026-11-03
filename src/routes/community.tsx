@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Heart, MessageCircle, Share2, ImagePlus, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Heart, MessageCircle, Share2, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Avatar, Composer } from "@/components/PostComposer";
 
 export const Route = createFileRoute("/community")({
   ssr: false,
