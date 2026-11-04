@@ -7,6 +7,7 @@ import { useStore } from "@/lib/store";
 import { BookCover } from "@/components/BookCover";
 import { FormatBadges } from "@/components/FormatBadges";
 import { PostBar } from "@/components/PostComposer";
+import { ExploreSection } from "@/components/ExploreSection";
 import { Stars, useRatingSummaries } from "@/components/BookReviews";
 
 export const Route = createFileRoute("/")({
@@ -59,6 +60,7 @@ function Index() {
       </section>
 
       <PostBar className="mx-auto max-w-6xl px-4 pt-6" />
+      <ExploreSection />
 
       <section className="mx-auto max-w-6xl px-4 py-8">
 
