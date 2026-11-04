@@ -94,7 +94,7 @@ function Index() {
   );
 }
 
-function BookCard({ book, rating }: { book: Book; rating?: { avg: number; count: number } }) {
+function BookCard({ book, rating }: { book: Book; rating?: { avg: number; count: number } | undefined }) {
   const prices = [book.hardPrice, book.softPrice].filter((p): p is number => p != null);
   const from = prices.length ? Math.min(...prices) : 0;
   return (

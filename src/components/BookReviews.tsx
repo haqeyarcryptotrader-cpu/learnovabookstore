@@ -67,14 +67,14 @@ export function BookReviews({ bookId }: { bookId: string }) {
 
   const submit = async () => {
     if (!userId) return;
-    if (rating < 1) return toast.error("Please choose 1–5 stars · ستوري وټاکئ");
+    if (rating < 1) { toast.error("Please choose 1–5 stars · ستوري وټاکئ"); return; }
     setBusy(true);
     const { error } = await supabase.from("book_reviews").upsert(
       { book_id: bookId, user_id: userId, author_name: name, rating, content: text.trim().slice(0, 2000) },
       { onConflict: "book_id,user_id" },
     );
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Thanks for your review! · مننه");
     load();
   };
