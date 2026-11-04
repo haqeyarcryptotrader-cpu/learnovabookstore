@@ -80,7 +80,7 @@ export function BookReviews({ bookId }: { bookId: string }) {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this review?")) return;
+    if (!confirm("Delete this review?")) return undefined;
     const { error } = await supabase.from("book_reviews").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
     if (mine?.id === id) { setRating(0); setText(""); }
