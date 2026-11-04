@@ -7,6 +7,7 @@ import { useStore } from "@/lib/store";
 import { BookCover } from "@/components/BookCover";
 import { FormatBadges } from "@/components/FormatBadges";
 import { PostBar } from "@/components/PostComposer";
+import { Stars, useRatingSummaries } from "@/components/BookReviews";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -36,6 +37,7 @@ function Index() {
   const [fmt, setFmt] = usePersistentState<"all" | "hard" | "soft">("lnv-fmt", "all");
   const w = WELCOME[lang];
 
+  const ratings = useRatingSummaries();
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
     return books.filter(
