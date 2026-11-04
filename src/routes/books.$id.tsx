@@ -10,6 +10,7 @@ import { recordOrder } from "@/lib/db";
 import { useStore } from "@/lib/store";
 import { BookCover } from "@/components/BookCover";
 import { FormatBadges } from "@/components/FormatBadges";
+import { BookReviews } from "@/components/BookReviews";
 
 export const Route = createFileRoute("/books/$id")({
   head: () => ({
@@ -128,6 +129,7 @@ function BookPage() {
           )}
         </div>
       </div>
+      <BookReviews bookId={book.id} />
     </div>
   );
 }
