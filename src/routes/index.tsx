@@ -84,7 +84,7 @@ function Index() {
         </div>
 
         <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
-          {list.map((b) => <BookCard key={b.id} book={b} />)}
+          {list.map((b) => <BookCard key={b.id} book={b} rating={ratings[b.id]} />)}
         </div>
         {list.length === 0 && <p className="py-16 text-center text-muted-foreground">No books match your search.</p>}
       </section>
@@ -92,7 +92,7 @@ function Index() {
   );
 }
 
-function BookCard({ book }: { book: Book }) {
+function BookCard({ book, rating }: { book: Book; rating?: { avg: number; count: number } }) {
   const prices = [book.hardPrice, book.softPrice].filter((p): p is number => p != null);
   const from = prices.length ? Math.min(...prices) : 0;
   return (
@@ -103,6 +103,7 @@ function BookCard({ book }: { book: Book }) {
       <div className="mt-3 space-y-1.5">
         <h3 className="font-display text-base leading-snug">{book.title}</h3>
         <p className="text-xs text-muted-foreground">{book.author}</p>
+        {rating && <p className="flex items-center gap-1 text-xs text-muted-foreground"><Stars value={rating.avg} size={12} /> {rating.avg.toFixed(1)} ({rating.count})</p>}
         {from === 0
           ? <p className="text-sm font-medium text-primary">Free PDF · وړیا</p>
           : <p className="text-sm font-medium">from {fmtAfn(from)} <span className="font-normal text-muted-foreground">· {fmtUsd(from)}</span></p>}
