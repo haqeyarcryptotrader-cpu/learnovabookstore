@@ -16,9 +16,13 @@ const fromRow = (r: Row): Book => ({
 });
 
 export async function fetchBooks(): Promise<Book[]> {
-  const { data, error } = await supabase.from("books").select("*").order("created_at", { ascending: true });
+  const { data, error } = await supabase.from("books")
+    .select("id,title,author,category,hard_price,soft_price,cover_url,description,in_stock,sample_pages")
+    .order("created_at", { ascending: true });
   if (error) throw error;
-  return (data as Row[]).map(fromRow);
+  const { data: links } = await supabase.rpc("book_pdf_links");
+  const map = new Map((links ?? []).map((l: { id: string; pdf_link: string }) => [l.id, l.pdf_link]));
+  return (data as Omit<Row, "pdf_link">[]).map((r) => fromRow({ ...r, pdf_link: map.get(r.id) ?? "" }));
 }
 
 export async function upsertBook(b: Book) {
@@ -38,7 +42,7 @@ export async function removeBook(id: string) {
 
 export interface OrderInput {
   customer_name: string; phone: string; city?: string; address?: string;
-  payment_method?: string; items: { title: string; format: string; qty: number; price: number }[];
+  payment_method?: string; items: { book_id: string; title: string; format: string; qty: number; price: number }[];
   total_afn: number;
 }
 
