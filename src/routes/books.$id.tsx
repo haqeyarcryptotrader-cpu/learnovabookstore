@@ -155,7 +155,7 @@ const schema = z.object({
   address: z.string().trim().min(5, "Enter a delivery address").max(300),
 });
 
-function QuickHardOrder({ title, price }: { title: string; price: number }) {
+function QuickHardOrder({ bookId, title, price }: { bookId: string; title: string; price: number }) {
   const [v, setV] = usePersistentState("lnv-quick", { name: "", phone: "", city: "Kabul", address: "" });
   useProfileAutofill(setV as never);
   const [err, setErr] = useState("");
