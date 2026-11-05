@@ -49,6 +49,8 @@ export const fmtUsd = (afn: number) => `$${toUsd(afn).toFixed(2)}`;
 
 export const priceFor = (b: Book, f: Format) => (f === "hard" ? b.hardPrice : b.softPrice);
 
+/** WhatsApp Channel invite link (https://whatsapp.com/channel/...). Empty = fall back to a chat request. */
+export const WHATSAPP_CHANNEL_URL = "";
 export const waLink = (text: string) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 
 export const SEED_BOOKS: Book[] = [
