@@ -90,7 +90,7 @@ function BookPage() {
             </button>
           )}
 
-          {f === "hard" && hardOk && <QuickHardOrder title={book.title} price={book.hardPrice!} />}
+          {f === "hard" && hardOk && <QuickHardOrder bookId={book.id} title={book.title} price={book.hardPrice!} />}
 
           {f === "soft" && isFree && (
             <div className="mt-8 space-y-3 rounded-lg border bg-card p-5">
@@ -155,7 +155,7 @@ const schema = z.object({
   address: z.string().trim().min(5, "Enter a delivery address").max(300),
 });
 
-function QuickHardOrder({ title, price }: { title: string; price: number }) {
+function QuickHardOrder({ bookId, title, price }: { bookId: string; title: string; price: number }) {
   const [v, setV] = usePersistentState("lnv-quick", { name: "", phone: "", city: "Kabul", address: "" });
   useProfileAutofill(setV as never);
   const [err, setErr] = useState("");
@@ -166,7 +166,7 @@ function QuickHardOrder({ title, price }: { title: string; price: number }) {
     setErr("");
     const msg = `Assalamu Alaikum Learnova Books! I want to order:\n\nBook: ${title}\nFormat: Hard Copy\nPrice: ${fmtAfn(price)} (${fmtUsd(price)})\nPayment: Cash on Delivery\n\nName: ${v.name}\nWhatsApp/Phone: ${v.phone}\nCity/Province: ${v.city}\nDelivery Address: ${v.address}`;
     window.open(waLink(msg), "_blank");
-    void recordOrder({ customer_name: v.name, phone: v.phone, city: v.city, address: v.address, payment_method: "Cash on Delivery", items: [{ title, format: "hard", qty: 1, price }], total_afn: price });
+    void recordOrder({ customer_name: v.name, phone: v.phone, city: v.city, address: v.address, payment_method: "Cash on Delivery", items: [{ book_id: bookId, title, format: "hard", qty: 1, price }], total_afn: price });
   };
   return (
     <div className="mt-8 space-y-3 rounded-lg border bg-card p-5">

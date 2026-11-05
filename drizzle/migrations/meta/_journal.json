@@ -50,6 +50,13 @@
       "when": 1793877294701,
       "tag": "0006_tighten_public_read_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793877998724,
+      "tag": "0007_protect_pdf_links_and_order_totals",
+      "breakpoints": true
     }
   ]
 }

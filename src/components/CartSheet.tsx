@@ -70,7 +70,7 @@ export function CartSheet() {
       customer_name: form.name, phone: form.phone,
       city: hasHard ? form.city : "", address: hasHard ? form.address : "",
       payment_method: [hasHard ? "Cash on Delivery" : "", hasSoft ? form.pay : ""].filter(Boolean).join(" + "),
-      items: lines.map((l) => ({ title: l.book.title, format: l.format, qty: l.qty, price: l.price })),
+      items: lines.map((l) => ({ book_id: l.bookId, title: l.book.title, format: l.format, qty: l.qty, price: l.price })),
       total_afn: total,
     });
     clearCart();
