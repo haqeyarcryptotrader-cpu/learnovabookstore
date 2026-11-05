@@ -9,6 +9,7 @@ import { FormatBadges } from "@/components/FormatBadges";
 import { PostBar } from "@/components/PostComposer";
 import { ExploreSection } from "@/components/ExploreSection";
 import { ReadingAssistant } from "@/components/ReadingAssistant";
+import { WhatsAppChannelBanner } from "@/components/WhatsAppChannelBanner";
 import { Stars, useRatingSummaries } from "@/components/BookReviews";
 
 export const Route = createFileRoute("/")({
@@ -61,6 +62,7 @@ function Index() {
       </section>
 
       <PostBar className="mx-auto max-w-6xl px-4 pt-6" />
+      <WhatsAppChannelBanner />
       <ReadingAssistant />
       <ExploreSection />
 
