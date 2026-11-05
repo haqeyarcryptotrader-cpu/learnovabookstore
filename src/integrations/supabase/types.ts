@@ -272,6 +272,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      book_pdf_links: {
+        Args: never
+        Returns: {
+          id: string
+          pdf_link: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
