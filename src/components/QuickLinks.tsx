@@ -46,7 +46,7 @@ export function QuickLinks() {
           </p>
           <h2 className="text-3xl font-bold leading-snug text-balance sm:text-4xl">هر کتاب، یوه نوې نړۍ</h2>
           <p dir="ltr" className="mt-1 font-display text-base italic text-muted-foreground sm:text-lg">Every book, a new world</p>
-          <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">کتاب ومومه، خپله لیکنه شریکه کړه، او وړیا PDFونه ترلاسه کړه.</p>
+          <p className="mx-auto mt-3 max-w-md text-sm text-foreground/75">کتاب ومومه، خپله لیکنه شریکه کړه، او وړیا PDFونه ترلاسه کړه.</p>
         </div>
 
         <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
