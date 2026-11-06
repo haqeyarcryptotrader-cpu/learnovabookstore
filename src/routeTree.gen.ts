@@ -16,8 +16,10 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as LibraryRouteImport } from './routes/library'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as BooksIdRouteImport } from './routes/books.$id'
+import { Route as ReaderIdRouteImport } from './routes/reader.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -54,6 +56,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -62,6 +69,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const BooksIdRoute = BooksIdRouteImport.update({
   id: '/books/$id',
   path: '/books/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReaderIdRoute = ReaderIdRouteImport.update({
+  id: '/reader/$id',
+  path: '/reader/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -73,8 +85,10 @@ export interface FileRoutesByFullPath {
   '/assistant': typeof AssistantRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
+  '/library': typeof LibraryRoute
   '/reset-password': typeof ResetPasswordRoute
   '/books/$id': typeof BooksIdRoute
+  '/reader/$id': typeof ReaderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -84,8 +98,10 @@ export interface FileRoutesByTo {
   '/assistant': typeof AssistantRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
+  '/library': typeof LibraryRoute
   '/reset-password': typeof ResetPasswordRoute
   '/books/$id': typeof BooksIdRoute
+  '/reader/$id': typeof ReaderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,8 +112,10 @@ export interface FileRoutesById {
   '/assistant': typeof AssistantRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
+  '/library': typeof LibraryRoute
   '/reset-password': typeof ResetPasswordRoute
   '/books/$id': typeof BooksIdRoute
+  '/reader/$id': typeof ReaderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -109,8 +127,10 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/community'
     | '/contact'
+    | '/library'
     | '/reset-password'
     | '/books/$id'
+    | '/reader/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -120,8 +140,10 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/community'
     | '/contact'
+    | '/library'
     | '/reset-password'
     | '/books/$id'
+    | '/reader/$id'
   id:
     | '__root__'
     | '/'
@@ -131,8 +153,10 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/community'
     | '/contact'
+    | '/library'
     | '/reset-password'
     | '/books/$id'
+    | '/reader/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -143,8 +167,10 @@ export interface RootRouteChildren {
   AssistantRoute: typeof AssistantRoute
   CommunityRoute: typeof CommunityRoute
   ContactRoute: typeof ContactRoute
+  LibraryRoute: typeof LibraryRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   BooksIdRoute: typeof BooksIdRoute
+  ReaderIdRoute: typeof ReaderIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -198,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -212,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BooksIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reader/$id': {
+      id: '/reader/$id'
+      path: '/reader/$id'
+      fullPath: '/reader/$id'
+      preLoaderRoute: typeof ReaderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -223,8 +263,10 @@ const rootRouteChildren: RootRouteChildren = {
   AssistantRoute: AssistantRoute,
   CommunityRoute: CommunityRoute,
   ContactRoute: ContactRoute,
+  LibraryRoute: LibraryRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   BooksIdRoute: BooksIdRoute,
+  ReaderIdRoute: ReaderIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

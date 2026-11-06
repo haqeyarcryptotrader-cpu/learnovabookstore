@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      book_access: {
+        Row: {
+          book_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       book_reviews: {
         Row: {
           author_name: string
@@ -272,6 +290,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_grant_book: {
+        Args: { _book_id: string; _email: string }
+        Returns: undefined
+      }
       book_pdf_links: {
         Args: never
         Returns: {
@@ -286,6 +308,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      reader_pdf_link: { Args: { _book_id: string }; Returns: string }
     }
     Enums: {
       app_role: "admin"

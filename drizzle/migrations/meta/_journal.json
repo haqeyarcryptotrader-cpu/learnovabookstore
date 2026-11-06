@@ -57,6 +57,13 @@
       "when": 1793877998724,
       "tag": "0007_protect_pdf_links_and_order_totals",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793967719275,
+      "tag": "0008_book_library_access",
+      "breakpoints": true
     }
   ]
 }

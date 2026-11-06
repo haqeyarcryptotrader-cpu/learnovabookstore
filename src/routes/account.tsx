@@ -144,6 +144,7 @@ function Dashboard({ email }: { email: string }) {
           <h1 className="font-display text-3xl">My account</h1>
           <p className="text-sm text-muted-foreground">{email}</p>
         </div>
+        <Link to="/library" className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">My Library / زما کتابتون</Link>
         <button onClick={() => supabase.auth.signOut()} className="rounded-md border px-4 py-2 text-sm hover:bg-muted">Sign out / وتل</button>
       </div>
 
