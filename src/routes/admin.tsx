@@ -240,6 +240,34 @@ function StampTool() {
   );
 }
 
+function UnlockTool() {
+  const { books } = useStore();
+  const paid = books.filter((b) => b.softPrice != null && b.softPrice > 0);
+  const [bookId, setBookId] = useState("");
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const field = "w-full rounded-md border bg-background px-3 py-2 text-sm";
+  const go = async () => {
+    if (!bookId || !email.includes("@")) { toast.error("Choose a book and enter the buyer's account email"); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_grant_book", { _email: email, _book_id: bookId });
+    setBusy(false);
+    if (error) toast.error(error.message); else { toast.success("Unlocked — the book is now in the buyer's My Library"); setEmail(""); }
+  };
+  return (
+    <div className="mt-6 max-w-lg space-y-3 rounded-lg border bg-card p-5">
+      <h2 className="font-semibold">Unlock a PDF for a buyer / کتاب خلاصول</h2>
+      <p className="text-xs text-muted-foreground">After you check the payment receipt, enter the email the buyer signed up with. The book opens in their Learnova Reader (no download).</p>
+      <select className={field} value={bookId} onChange={(e) => setBookId(e.target.value)}>
+        <option value="">Choose a book…</option>
+        {paid.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}
+      </select>
+      <input className={field} type="email" placeholder="Buyer's account email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <button disabled={busy} onClick={go} className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-60">{busy ? "Unlocking…" : "Unlock / خلاص یې کړه"}</button>
+    </div>
+  );
+}
+
 function Orders() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const load = () => supabase.from("orders").select("*").order("created_at", { ascending: false }).then(({ data }) => setOrders((data as unknown as Order[]) ?? []));
@@ -274,7 +302,7 @@ function Orders() {
 function Admin({ email }: { email: string }) {
   const { books, saveBook, deleteBook } = useStore();
   const [edit, setEdit] = usePersistentState<Book | null>("lnv-edit", null);
-  const [tab, setTab] = usePersistentState<"books" | "orders" | "stamp" | "posts">("lnv-tab", "books");
+  const [tab, setTab] = usePersistentState<"books" | "orders" | "stamp" | "posts" | "unlock">("lnv-tab", "books");
 
   const tabBtn = (t: typeof tab, label: string) => (
     <button onClick={() => setTab(t)} className={`rounded-md px-4 py-2 text-sm ${tab === t ? "bg-primary text-primary-foreground" : "border"}`}>{label}</button>
@@ -292,11 +320,12 @@ function Admin({ email }: { email: string }) {
           {tabBtn("orders", "Orders")}
           {tabBtn("posts", "Posts / پوسټونه")}
           {tabBtn("stamp", "Stamp PDF / مهر")}
+          {tabBtn("unlock", "Unlock PDF / خلاصول")}
           <button onClick={() => supabase.auth.signOut()} className="inline-flex items-center gap-1 rounded-md border px-4 py-2 text-sm"><LogOut className="h-4 w-4" /> Sign out</button>
         </div>
       </div>
 
-      {tab === "orders" ? <Orders /> : tab === "stamp" ? <StampTool /> : tab === "posts" ? <PostReview /> : (
+      {tab === "orders" ? <Orders /> : tab === "stamp" ? <StampTool /> : tab === "unlock" ? <UnlockTool /> : tab === "posts" ? <PostReview /> : (
         <>
           <div className="mt-6 flex justify-end">
             <button onClick={() => setEdit({ ...empty })} className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"><Plus className="h-4 w-4" /> Add book</button>

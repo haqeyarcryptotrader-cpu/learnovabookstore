@@ -125,6 +125,7 @@ function BookPage() {
               <a href={waLink(receiptMsg)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-md bg-whatsapp px-4 py-2.5 text-sm font-medium text-whatsapp-foreground">
                 <MessageCircle className="h-4 w-4" /> Verify receipt on WhatsApp
               </a>
+              <p className="text-sm text-muted-foreground">Sign in and send your account email with the receipt — after approval the book opens in your <Link to="/library" className="text-primary underline">My Library · Learnova Reader</Link>.</p>
             </div>
           )}
         </div>
