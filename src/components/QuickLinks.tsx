@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BellRing, ChevronLeft, Compass, Sparkles } from "lucide-react";
+import { BellRing, BookOpen, ChevronLeft, Compass, Sparkles } from "lucide-react";
 import { WHATSAPP_CHANNEL_URL, waLink } from "@/lib/books";
 
 type IconType = typeof Sparkles;
@@ -46,10 +46,11 @@ export function QuickLinks() {
           </p>
           <h2 className="text-3xl font-bold leading-snug text-balance sm:text-4xl">هر کتاب، یوه نوې نړۍ</h2>
           <p dir="ltr" className="mt-1 font-display text-base italic text-muted-foreground sm:text-lg">Every book, a new world</p>
-          <p className="mx-auto mt-3 max-w-md text-sm text-foreground/75">کتاب ومومه، خپله لیکنه شریکه کړه، او وړیا PDFونه ترلاسه کړه.</p>
+          <p className="mx-auto mt-3 max-w-md text-sm text-foreground/75">خپل پېرل شوي کتابونه ولوله، نوي کتابونه ومومه، او وړیا PDFونه ترلاسه کړه.</p>
         </div>
 
-        <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+        <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
+          <Tile to="/library" cls="tile-library" icon={BookOpen} title="My Library" sub="زما کتابتون" />
           <Tile to="/assistant" cls="tile-ai" icon={Sparkles} title="AI Guide" sub="کتاب راته ومومه" />
           <Tile to="/community" cls="tile-explore" icon={Compass} title="Explore" sub="د لوستونکو لیکنې" />
           <Tile href={wa} cls="tile-free" icon={BellRing} title="Free books" sub="WhatsApp چینل" />
