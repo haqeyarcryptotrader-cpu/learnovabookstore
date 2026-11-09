@@ -13,10 +13,14 @@ import {
   Bookmark,
   BookmarkCheck,
   Clock,
-  Sparkles,
   Palette,
   Volume2,
   VolumeX,
+  Highlighter,
+  Share2,
+  Check,
+  X,
+  Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useStore } from "@/lib/store";
@@ -38,38 +42,61 @@ export const Route = createFileRoute("/reader/$id")({
 
 type Doc = { numPages: number; getPage: (n: number) => Promise<any> };
 type Theme = "light" | "sepia" | "dark";
+type Highlight = { id: string; page: number; topPercent: number; color: string };
 
-// Realistic Paper Page-Turn Sound Synthesizer via Web Audio API (zero external files required)
+// Realistic Dual-Layer Paper Page-Turn Sound Synthesizer via Web Audio API
 function playPageTurnSound() {
   try {
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
-    const bufferSize = ctx.sampleRate * 0.18; // 180ms paper rustle
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
+
+    // Layer 1: Soft paper friction (body)
+    const dur1 = 0.22;
+    const bufSize1 = ctx.sampleRate * dur1;
+    const buf1 = ctx.createBuffer(1, bufSize1, ctx.sampleRate);
+    const d1 = buf1.getChannelData(0);
+    for (let i = 0; i < bufSize1; i++) {
+      d1[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize1 * 0.42));
     }
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
+    const src1 = ctx.createBufferSource();
+    src1.buffer = buf1;
+    const filter1 = ctx.createBiquadFilter();
+    filter1.type = "bandpass";
+    filter1.frequency.setValueAtTime(850, ctx.currentTime);
+    filter1.Q.setValueAtTime(1.2, ctx.currentTime);
+    const gain1 = ctx.createGain();
+    gain1.gain.setValueAtTime(0.22, ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur1);
+    src1.connect(filter1);
+    filter1.connect(gain1);
+    gain1.connect(ctx.destination);
+    src1.start();
+    src1.stop(ctx.currentTime + dur1);
 
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.setValueAtTime(1400, ctx.currentTime);
-    filter.Q.setValueAtTime(1.8, ctx.currentTime);
-
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.28, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
-
-    noise.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-    noise.start();
-    noise.stop(ctx.currentTime + 0.18);
+    // Layer 2: Gentle page snap / whoosh (high airy whisper)
+    const dur2 = 0.16;
+    const bufSize2 = ctx.sampleRate * dur2;
+    const buf2 = ctx.createBuffer(1, bufSize2, ctx.sampleRate);
+    const d2 = buf2.getChannelData(0);
+    for (let i = 0; i < bufSize2; i++) {
+      d2[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize2 * 0.28));
+    }
+    const src2 = ctx.createBufferSource();
+    src2.buffer = buf2;
+    const filter2 = ctx.createBiquadFilter();
+    filter2.type = "highpass";
+    filter2.frequency.setValueAtTime(2200, ctx.currentTime);
+    const gain2 = ctx.createGain();
+    gain2.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur2);
+    src2.connect(filter2);
+    filter2.connect(gain2);
+    gain2.connect(ctx.destination);
+    src2.start(ctx.currentTime + 0.02);
+    src2.stop(ctx.currentTime + dur2);
   } catch {
-    // Ignore audio failures if browser blocks autoplay
+    // Ignore audio failures if autoplay is blocked
   }
 }
 
@@ -132,6 +159,20 @@ function ReaderPage() {
   const [isFlipping, setIsFlipping] = useState(false);
   const [flipDirection, setFlipDirection] = useState<"next" | "prev">("next");
 
+  // Highlighter state
+  const [highlightMode, setHighlightMode] = useState(false);
+  const [activeColor, setActiveColor] = useState<"yellow" | "green" | "pink">("yellow");
+  const [highlights, setHighlights] = useState<Highlight[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(`lnv-highlights-${id}`) || "[]");
+    } catch {
+      return [];
+    }
+  });
+
+  // Share invite state
+  const [shareCopied, setShareCopied] = useState(false);
+
   // Bookmarks
   const [bookmarks, setBookmarks] = useState<number[]>(() => {
     try {
@@ -143,17 +184,16 @@ function ReaderPage() {
 
   // Reading analytics
   const [secondsRead, setSecondsRead] = useState(0);
-  const [pagesTurned, setPagesTurned] = useState(0);
 
   const canvas = useRef<HTMLCanvasElement>(null);
+  const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
 
-  // Load and cache PDF (Works 100% Offline once loaded!)
+  // Load and cache PDF
   useEffect(() => {
     let active = true;
     (async () => {
-      // 1. Try reading from offline local cache first
       const cached = await getCachedPdf(id);
       if (cached && active) {
         try {
@@ -167,11 +207,10 @@ function ReaderPage() {
             return;
           }
         } catch {
-          // If cached buffer fails, fallback to network
+          // fallback
         }
       }
 
-      // 2. Fetch via network & save into offline cache
       const { data: s } = await supabase.auth.getSession();
       if (!s.session) {
         if (active) setErr("signin");
@@ -204,7 +243,7 @@ function ReaderPage() {
     };
   }, [id]);
 
-  // Reading time counter
+  // Reading timer
   useEffect(() => {
     const timer = setInterval(() => setSecondsRead((s) => s + 1), 1000);
     return () => clearInterval(timer);
@@ -220,10 +259,9 @@ function ReaderPage() {
       if (soundEnabled) playPageTurnSound();
       setFlipDirection(dir);
       setIsFlipping(true);
-      setTimeout(() => setIsFlipping(false), 260);
+      setTimeout(() => setIsFlipping(false), 340);
 
       setPage(valid);
-      setPagesTurned((c) => c + 1);
     },
     [doc, page, soundEnabled]
   );
@@ -276,6 +314,61 @@ function ReaderPage() {
       document.exitFullscreen?.();
       setFullscreen(false);
     }
+  };
+
+  useEffect(() => {
+    const onFsChange = () => setFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
+  // Handle Highlighting on Canvas Click
+  const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!highlightMode || !canvasWrapperRef.current) return;
+    const rect = canvasWrapperRef.current.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+    const topPercent = Math.max(3, Math.min(95, (clickY / rect.height) * 100));
+
+    const colorHex = activeColor === "yellow" ? "#fef08a" : activeColor === "green" ? "#bbf7d0" : "#fbcfe8";
+    const newHl: Highlight = {
+      id: `${Date.now()}-${Math.random()}`,
+      page,
+      topPercent,
+      color: colorHex,
+    };
+
+    const next = [...highlights, newHl];
+    setHighlights(next);
+    localStorage.setItem(`lnv-highlights-${id}`, JSON.stringify(next));
+  };
+
+  const removeHighlight = (hlId: string) => {
+    const next = highlights.filter((h) => h.id !== hlId);
+    setHighlights(next);
+    localStorage.setItem(`lnv-highlights-${id}`, JSON.stringify(next));
+  };
+
+  // Share with 5% discount invite
+  const handleShareInvite = async () => {
+    const shareUrl = `${window.location.origin}/books/${id}`;
+    const shareText = `سلام! دغه کتاب «${book?.title ?? "کتاب"}» په Learnova Books کې وګورئ. د ملګري په بلنه ۵٪ تخفیف ترلاسه کړئ:`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: book?.title ?? "Learnova Books",
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // fallback
+      }
+    }
+
+    await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2800);
   };
 
   // Touch Swipe Handlers for mobile
@@ -350,7 +443,7 @@ function ReaderPage() {
 
   const minutesRead = Math.floor(secondsRead / 60);
   const progressPercent = doc ? Math.round((page / doc.numPages) * 100) : 0;
-  const estRemainingMinutes = doc ? Math.round((doc.numPages - page) * 1.2) : 0;
+  const pageHighlights = highlights.filter((h) => h.page === page);
 
   return (
     <div
@@ -366,37 +459,58 @@ function ReaderPage() {
         @media print {
           body { display: none !important; }
         }
+        .perspective-desk {
+          perspective: 1600px;
+        }
         .page-flip-anim-next {
-          animation: flipNext 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+          animation: realisticFlipNext 0.34s cubic-bezier(0.25, 1, 0.5, 1);
+          transform-origin: right center;
         }
         .page-flip-anim-prev {
-          animation: flipPrev 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+          animation: realisticFlipPrev 0.34s cubic-bezier(0.25, 1, 0.5, 1);
+          transform-origin: left center;
         }
-        @keyframes flipNext {
-          0% { transform: scale(0.98) translateX(12px) rotateY(-3deg); opacity: 0.7; }
-          100% { transform: scale(1) translateX(0) rotateY(0deg); opacity: 1; }
+        @keyframes realisticFlipNext {
+          0% {
+            transform: rotateY(-8deg) scale(0.97) translateX(10px);
+            box-shadow: -15px 15px 30px rgba(0,0,0,0.22);
+            opacity: 0.8;
+          }
+          100% {
+            transform: rotateY(0deg) scale(1) translateX(0);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            opacity: 1;
+          }
         }
-        @keyframes flipPrev {
-          0% { transform: scale(0.98) translateX(-12px) rotateY(3deg); opacity: 0.7; }
-          100% { transform: scale(1) translateX(0) rotateY(0deg); opacity: 1; }
+        @keyframes realisticFlipPrev {
+          0% {
+            transform: rotateY(8deg) scale(0.97) translateX(-10px);
+            box-shadow: 15px 15px 30px rgba(0,0,0,0.22);
+            opacity: 0.8;
+          }
+          100% {
+            transform: rotateY(0deg) scale(1) translateX(0);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            opacity: 1;
+          }
         }
       `}</style>
 
       {/* Top Controls Bar */}
-      <div className={`sticky top-2 z-20 mx-auto max-w-4xl flex flex-wrap items-center justify-between gap-2 rounded-xl border p-2.5 shadow-md backdrop-blur-md transition-colors ${deskBg}`}>
+      <div className={`sticky top-2 z-20 mx-auto max-w-4xl flex flex-wrap items-center justify-between gap-2 rounded-xl border p-2 sm:p-2.5 shadow-md backdrop-blur-md transition-colors ${deskBg}`}>
         <div className="flex items-center gap-2">
           <Link to="/library" className="inline-flex items-center gap-1 text-sm font-medium hover:opacity-80">
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden sm:inline">کتابتون</span>
           </Link>
           <div className="h-4 w-px bg-border/60" />
-          <p className="line-clamp-1 max-w-[180px] sm:max-w-[280px] text-xs sm:text-sm font-semibold">
+          <p className="line-clamp-1 max-w-[140px] sm:max-w-[240px] text-xs sm:text-sm font-semibold">
             {book?.title ?? "Learnova Reader"}
           </p>
         </div>
 
         {/* Action Tools */}
-        <div className="flex items-center gap-1 sm:gap-1.5 text-xs">
+        <div className="flex items-center gap-1 sm:gap-1.5 text-xs flex-wrap">
           {/* Zoom */}
           <button aria-label="کوچنول" onClick={() => setZoom((z) => Math.max(0.65, z - 0.15))} className="rounded-lg border p-1.5 hover:bg-black/5 dark:hover:bg-white/5">
             <ZoomOut className="h-4 w-4" />
@@ -412,8 +526,20 @@ function ReaderPage() {
           </button>
 
           {/* Sound toggle */}
-          <button aria-label="د پاڼې غږ" onClick={() => setSoundEnabled((s) => !s)} className={`rounded-lg border p-1.5 hover:bg-black/5 dark:hover:bg-white/5 ${soundEnabled ? "text-primary" : "opacity-40"}`}>
+          <button aria-label="د پاڼې غږ" onClick={() => setSoundEnabled((s) => !s)} className={`rounded-lg border p-1.5 hover:bg-black/5 dark:hover:bg-white/5 ${soundEnabled ? "text-primary font-bold" : "opacity-40"}`}>
             {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+          </button>
+
+          {/* Highlighter toggle */}
+          <button
+            aria-label="هایلایټ"
+            onClick={() => setHighlightMode((h) => !h)}
+            className={`flex items-center gap-1 rounded-lg border px-2 py-1.5 transition ${
+              highlightMode ? "bg-amber-400/25 border-amber-500 text-amber-700 dark:text-amber-300 font-semibold" : "hover:bg-black/5 dark:hover:bg-white/5"
+            }`}
+          >
+            <Highlighter className="h-4 w-4" />
+            <span className="hidden sm:inline">هایلایټ</span>
           </button>
 
           {/* Bookmark */}
@@ -422,10 +548,65 @@ function ReaderPage() {
           </button>
 
           {/* Fullscreen */}
-          <button aria-label="فول سکرین" onClick={toggleFullscreen} className="rounded-lg border p-1.5 hover:bg-black/5 dark:hover:bg-white/5">
+          <button
+            aria-label="فول سکرین"
+            onClick={toggleFullscreen}
+            className={`rounded-lg border p-1.5 transition ${fullscreen ? "bg-primary text-primary-foreground" : "hover:bg-black/5 dark:hover:bg-white/5"}`}
+            title="بشپړ سکرین (F)"
+          >
             {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
           </button>
         </div>
+      </div>
+
+      {/* Highlighter Color Picker Palette (when active) */}
+      {highlightMode && (
+        <div className={`mx-auto mt-2 max-w-4xl flex items-center justify-between rounded-xl border p-2 text-xs shadow-sm backdrop-blur ${deskBg}`}>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-amber-600 dark:text-amber-400">د رنګ انتخاب:</span>
+            <button
+              onClick={() => setActiveColor("yellow")}
+              className={`h-5 w-5 rounded-full bg-yellow-200 border-2 transition ${activeColor === "yellow" ? "border-amber-600 scale-110 shadow" : "border-transparent"}`}
+            />
+            <button
+              onClick={() => setActiveColor("green")}
+              className={`h-5 w-5 rounded-full bg-emerald-200 border-2 transition ${activeColor === "green" ? "border-emerald-600 scale-110 shadow" : "border-transparent"}`}
+            />
+            <button
+              onClick={() => setActiveColor("pink")}
+              className={`h-5 w-5 rounded-full bg-pink-200 border-2 transition ${activeColor === "pink" ? "border-pink-600 scale-110 shadow" : "border-transparent"}`}
+            />
+            <span className="text-[11px] opacity-75 hidden sm:inline">(په هر ځای کلیک وکړئ ترڅو هایلایټ شي)</span>
+          </div>
+          <button onClick={() => setHighlightMode(false)} className="text-xs opacity-60 hover:opacity-100 flex items-center gap-0.5">
+            <X className="h-3.5 w-3.5" />
+            بندول
+          </button>
+        </div>
+      )}
+
+      {/* 5% Discount Invite & Share Banner */}
+      <div className="mx-auto mt-2.5 max-w-4xl flex items-center justify-between gap-2 rounded-xl bg-gradient-to-r from-amber-500/15 via-primary/10 to-emerald-500/15 border border-primary/25 px-3 py-1.5 shadow-sm text-xs">
+        <div className="flex items-center gap-1.5 font-medium">
+          <Sparkles className="h-4 w-4 text-amber-500" />
+          <span>د یو ملګري په دعوت کولو ۵ فیصده تخفیف!</span>
+        </div>
+        <button
+          onClick={handleShareInvite}
+          className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground shadow transition hover:opacity-90 active:scale-95"
+        >
+          {shareCopied ? (
+            <>
+              <Check className="h-3.5 w-3.5 text-white" />
+              <span>کاپي شو!</span>
+            </>
+          ) : (
+            <>
+              <Share2 className="h-3.5 w-3.5" />
+              <span>بلنه ولېږئ</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Reading Progress & Analytics Strip */}
@@ -440,7 +621,7 @@ function ReaderPage() {
             <span>{progressPercent}٪ بشپړ</span>
           </div>
           <div>
-            <span>پاتې وخت: تقریباً {estRemainingMinutes} دقيقې</span>
+            <span>ټول مخونه: {doc.numPages}</span>
           </div>
         </div>
       )}
@@ -453,7 +634,9 @@ function ReaderPage() {
             <button
               key={b}
               onClick={() => changePage(b, b > page ? "next" : "prev")}
-              className={`rounded px-2 py-0.5 border text-[11px] font-medium transition ${b === page ? "bg-amber-500 text-white border-amber-600" : "bg-card/70 hover:bg-card"}`}
+              className={`rounded px-2 py-0.5 border text-[11px] font-medium transition ${
+                b === page ? "bg-amber-500 text-white border-amber-600 shadow-sm" : "bg-card/70 hover:bg-card"
+              }`}
             >
               مخ {b}
             </button>
@@ -468,14 +651,36 @@ function ReaderPage() {
           <p className="mt-4 text-sm opacity-70">کتاب د پرانیستلو په حال کې دی...</p>
         </div>
       ) : (
-        <div className="mx-auto mt-3 max-w-4xl">
+        <div className="perspective-desk mx-auto mt-3 max-w-4xl">
           <div className={`relative mx-auto overflow-hidden rounded-2xl border p-2 sm:p-4 shadow-2xl transition-all ${deskBg}`}>
             <div
-              className={`relative mx-auto w-fit transition-transform duration-200 ${
-                isFlipping ? (flipDirection === "next" ? "page-flip-anim-next" : "page-flip-anim-prev") : ""
-              }`}
+              ref={canvasWrapperRef}
+              onClick={handleCanvasClick}
+              className={`relative mx-auto w-fit transition-transform duration-300 ${
+                highlightMode ? "cursor-crosshair" : ""
+              } ${isFlipping ? (flipDirection === "next" ? "page-flip-anim-next" : "page-flip-anim-prev") : ""}`}
             >
-              <canvas ref={canvas} className="block rounded-lg shadow-lg" style={canvasFilter} />
+              <canvas ref={canvas} className="block rounded-lg shadow-md" style={canvasFilter} />
+
+              {/* Dynamic Highlighter Overlays for Current Page */}
+              {pageHighlights.map((hl) => (
+                <div
+                  key={hl.id}
+                  style={{ top: `${hl.topPercent}%`, backgroundColor: hl.color }}
+                  className="group absolute left-1 right-1 h-5 -translate-y-1/2 rounded opacity-50 mix-blend-multiply transition hover:opacity-85"
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeHighlight(hl.id);
+                    }}
+                    className="absolute -right-2 -top-2 hidden h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white shadow group-hover:flex"
+                    title="پاکول"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
 
               {/* Protective Watermark */}
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
