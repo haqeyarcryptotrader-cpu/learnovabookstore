@@ -17,7 +17,6 @@ import {
   StickyNote,
   Star,
   Sparkles,
-  Eye,
   type LucideIcon,
 } from "lucide-react";
 import { CATEGORIES, fmtAfn, fmtUsd, normalizeCategory, type Book } from "@/lib/books";
@@ -61,9 +60,6 @@ const T = {
     statFree: "free",
     catTitle: "Pick a topic you love",
     catSub: "A book for every curiosity",
-    spotlight: "Book spotlight",
-    view: "View book",
-    freeBadge: "FREE",
     freeTitle: "Free books",
     freeSub: "Read without paying and start your reading habit today",
     featTitle: "Top books",
@@ -113,9 +109,6 @@ const T = {
     statFree: "رایگان",
     catTitle: "موضوع مورد علاقه‌تان را انتخاب کنید",
     catSub: "برای هر ذوق یک کتاب",
-    spotlight: "کتاب ویژه",
-    view: "مشاهده کتاب",
-    freeBadge: "رایگان",
     freeTitle: "کتاب‌های رایگان",
     freeSub: "بدون پرداخت بخوانید و عادت مطالعه را از امروز شروع کنید",
     featTitle: "کتاب‌های برتر",
@@ -165,9 +158,6 @@ const T = {
     statFree: "وړیا",
     catTitle: "خپله خوښه موضوع وټاکئ",
     catSub: "د هر ذوق لپاره کتاب",
-    spotlight: "ځانګړی کتاب",
-    view: "کتاب وګورئ",
-    freeBadge: "وړیا",
     freeTitle: "وړیا کتابونه",
     freeSub: "پرته له تادیې یې ولولئ او نن د مطالعې عادت پیل کړئ",
     featTitle: "غوره کتابونه",
@@ -206,8 +196,6 @@ const T = {
 const PILLAR_ICONS: LucideIcon[] = [Truck, Zap, ShieldCheck, Gift];
 const STEP_ICONS: LucideIcon[] = [ShoppingBag, MessageCircle, BookOpen];
 const COVERS = ["cover-tech", "cover-crypto", "cover-self", "cover-history", "cover-lit"];
-
-const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
 
 const minPrice = (b: Book) => {
   const p = [b.hardPrice, b.softPrice].filter((x): x is number => x != null);
@@ -264,212 +252,11 @@ function SectionTitle({ title, sub, hf }: { title: string; sub?: string; hf: str
   );
 }
 
-/* ───────────────────────── Book3D: a real-looking book ─────────────────────────
-   - it has a spine, a hard-cover hinge and page edges, and it turns toward the mouse
-   - a soft light follows the pointer across the cover
-   - it slides in from the shelf when it scrolls into view
-   - with `shelf`, it stands on a wooden-style ledge                               */
-
-const THICK = 14; // book thickness in px
-const REST = { ry: 20, rx: -6 };
-
-function Book3D(props: {
-  book: Book;
-  badge?: string;
-  hint?: string;
-  index?: number;
-  shelf?: boolean;
-  entrance?: boolean;
-}) {
-  const { book, badge, hint, index = 0, shelf = false, entrance = true } = props;
-  const wrap = useRef<HTMLDivElement>(null);
-  const tilt = useRef<HTMLDivElement>(null);
-  const shadow = useRef<HTMLDivElement>(null);
-  const shine = useRef<HTMLDivElement>(null);
-  const [shown, setShown] = useState(!entrance);
-
-  useEffect(() => {
-    if (!entrance) return;
-    const el = wrap.current;
-    if (!el) return;
-    if (!("IntersectionObserver" in window)) {
-      setShown(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setShown(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.15 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [entrance]);
-
-  const pose = (ry: number, rx: number, lift: boolean) => {
-    if (tilt.current) tilt.current.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateZ(${lift ? 16 : 0}px)`;
-    if (shadow.current) {
-      shadow.current.style.transform = `translateX(${(ry - REST.ry) * 0.8}px) scaleX(${lift ? 1.06 : 1})`;
-      shadow.current.style.opacity = lift ? "0.8" : "0.5";
-    }
-  };
-
-  const move = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === "touch") return; // keep touch scrolling smooth
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    const px = clamp((e.clientX - r.left) / r.width, 0, 1);
-    const py = clamp((e.clientY - r.top) / r.height, 0, 1);
-    pose(REST.ry + (px - 0.5) * 34, REST.rx + (py - 0.5) * 16, true);
-    if (shine.current) {
-      shine.current.style.setProperty("--mx", `${px * 100}%`);
-      shine.current.style.setProperty("--my", `${py * 100}%`);
-      shine.current.style.opacity = "1";
-    }
-  };
-
-  const leave = () => {
-    pose(REST.ry, REST.rx, false);
-    if (shine.current) shine.current.style.opacity = "0";
-  };
-
-  return (
-    <div
-      ref={wrap}
-      className="relative"
-      style={{
-        opacity: shown ? 1 : 0,
-        transform: shown ? "none" : "translateY(36px) scale(0.94)",
-        transition: `opacity .7s ease ${index * 70}ms, transform .8s cubic-bezier(.2,.8,.2,1) ${index * 70}ms`,
-      }}
-    >
-      <div
-        className="relative"
-        style={{ perspective: 1000 }}
-        onPointerMove={move}
-        onPointerLeave={leave}
-        onPointerCancel={leave}
-      >
-        {/* shadow on the shelf */}
-        <div
-          ref={shadow}
-          aria-hidden
-          className="absolute -bottom-2 left-[8%] right-[8%] h-5 rounded-[50%] blur-md"
-          style={{ background: "rgba(0,0,0,0.55)", opacity: 0.5, transition: "transform .25s ease, opacity .25s ease" }}
-        />
-
-        <div
-          ref={tilt}
-          className="relative aspect-[2/3] w-full"
-          style={{
-            transformStyle: "preserve-3d",
-            transform: `rotateX(${REST.rx}deg) rotateY(${REST.ry}deg)`,
-            transition: "transform .22s ease-out",
-          }}
-        >
-          {/* spine */}
-          <div
-            aria-hidden
-            className="absolute overflow-hidden"
-            style={{
-              top: 0,
-              bottom: 0,
-              left: -THICK / 2,
-              width: THICK,
-              transform: "rotateY(-90deg)",
-              background:
-                "linear-gradient(90deg, rgba(0,0,0,0.5), rgba(0,0,0,0.2)), color-mix(in oklab, var(--foreground) 60%, var(--card))",
-            }}
-          >
-            <span
-              className="block h-full overflow-hidden text-ellipsis whitespace-nowrap px-0.5 text-[8px] font-semibold text-white/70"
-              style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-            >
-              {book.title}
-            </span>
-          </div>
-
-          {/* page edges on top */}
-          <div
-            aria-hidden
-            className="absolute"
-            style={{
-              left: 0,
-              right: 0,
-              top: -THICK / 2,
-              height: THICK,
-              transform: "rotateX(90deg)",
-              background: "repeating-linear-gradient(90deg, #fffdf6 0 2px, #e6dfcc 2px 3px)",
-            }}
-          />
-
-          {/* front cover */}
-          <div
-            className="absolute inset-0 [&>*]:h-full [&>*]:w-full"
-            style={{ transform: `translateZ(${THICK / 2}px)` }}
-          >
-            <BookCover book={book} />
-            {/* hard-cover hinge groove */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-md"
-              style={{
-                background:
-                  "linear-gradient(90deg, rgba(0,0,0,0.3) 0, rgba(255,255,255,0.14) 2.5%, rgba(0,0,0,0.14) 5%, transparent 10%), linear-gradient(115deg, rgba(255,255,255,0.2) 0%, transparent 35%, transparent 70%, rgba(0,0,0,0.14) 100%)",
-              }}
-            />
-            {/* light that follows the pointer */}
-            <div
-              ref={shine}
-              aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-md"
-              style={{
-                opacity: 0,
-                transition: "opacity .25s ease",
-                mixBlendMode: "soft-light",
-                background: "radial-gradient(circle at var(--mx, 50%) var(--my, 30%), rgba(255,255,255,0.75), transparent 55%)",
-              }}
-            />
-            {badge && (
-              <span className="absolute right-2 top-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-accent-foreground shadow">
-                {badge}
-              </span>
-            )}
-            {hint && (
-              <span className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-black/65 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur">
-                  <Eye className="h-3.5 w-3.5" />
-                  {hint}
-                </span>
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {shelf && (
-        <div
-          aria-hidden
-          className="-mx-2 mt-1 h-2.5 rounded-sm"
-          style={{
-            background:
-              "linear-gradient(180deg, color-mix(in oklab, var(--foreground) 24%, var(--card)), color-mix(in oklab, var(--foreground) 10%, var(--card)))",
-            boxShadow: "0 8px 10px -6px color-mix(in oklab, var(--foreground) 40%, transparent)",
-          }}
-        />
-      )}
-    </div>
-  );
-}
-
-/* the hero: three real covers floating over a soft glow, with small badges */
+/* three real covers floating over a soft glow, with small floating badges */
 const SLOTS = [
-  { left: "0%", top: "18%", rot: -8, z: 1, dur: 7, delay: 0 },
+  { left: "0%", top: "18%", rot: -18, z: 1, dur: 7, delay: 0 },
   { left: "25%", top: "0%", rot: 0, z: 3, dur: 6, delay: 0.7 },
-  { left: "50%", top: "20%", rot: 8, z: 2, dur: 8, delay: 1.4 },
+  { left: "50%", top: "20%", rot: 18, z: 2, dur: 8, delay: 1.4 },
 ];
 
 function HeroVisual(props: {
@@ -481,7 +268,7 @@ function HeroVisual(props: {
   const { books, top, chipPdf, chipOff } = props;
   const slots = books.length >= 3 ? SLOTS : books.length === 2 ? [SLOTS[0], SLOTS[2]] : [SLOTS[1]];
   return (
-    <div dir="ltr" className="relative mx-auto h-[300px] w-[290px] sm:h-[380px] sm:w-[360px]">
+    <div dir="ltr" className="relative mx-auto h-[300px] w-[290px] sm:h-[380px] sm:w-[360px]" style={{ perspective: 1100 }}>
       <div
         aria-hidden
         className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
@@ -490,27 +277,25 @@ function HeroVisual(props: {
       {books.slice(0, slots.length).map((b, i) => {
         const p = slots[i];
         return (
-          <Link
+          <div
             key={b.id}
-            to="/books/$id"
-            params={{ id: b.id }}
-            className="absolute block w-[50%] drop-shadow-2xl"
+            className="absolute w-[50%] drop-shadow-2xl"
             style={{
               left: p.left,
               top: p.top,
               zIndex: p.z,
-              transform: `rotateZ(${p.rot}deg)`,
+              transform: `rotateY(${p.rot}deg) rotateZ(${p.rot / 4}deg)`,
               animation: `lnv-float ${p.dur}s ease-in-out ${p.delay}s infinite`,
             }}
           >
-            <Book3D book={b} entrance={false} />
-          </Link>
+            <BookCover book={b} />
+          </div>
         );
       })}
 
       {top && (
         <div
-          className="pointer-events-none absolute right-0 top-1 z-10 flex items-center gap-1 rounded-full border bg-card/90 px-3 py-1.5 text-xs font-semibold shadow-lg backdrop-blur"
+          className="absolute right-0 top-1 z-10 flex items-center gap-1 rounded-full border bg-card/90 px-3 py-1.5 text-xs font-semibold shadow-lg backdrop-blur"
           style={{ animation: "lnv-float 7s ease-in-out .4s infinite" }}
         >
           <Star className="h-3.5 w-3.5 fill-chart-5 text-chart-5" />
@@ -519,14 +304,14 @@ function HeroVisual(props: {
         </div>
       )}
       <div
-        className="pointer-events-none absolute bottom-3 left-0 z-10 flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg"
+        className="absolute bottom-3 left-0 z-10 flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg"
         style={{ animation: "lnv-float 8s ease-in-out 1s infinite" }}
       >
         <Zap className="h-3.5 w-3.5" />
         {chipPdf}
       </div>
       <div
-        className="pointer-events-none absolute bottom-0 right-4 z-10 flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground shadow-lg"
+        className="absolute bottom-0 right-4 z-10 flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground shadow-lg"
         style={{ animation: "lnv-float 9s ease-in-out .2s infinite" }}
       >
         <Gift className="h-3.5 w-3.5" />
@@ -564,79 +349,6 @@ function OpenBook() {
   );
 }
 
-/* a big "book spotlight": one top book, large, over a glow made from its own cover */
-function Spotlight(props: {
-  book: Book;
-  rating?: { avg: number; count: number };
-  w: (typeof T)[keyof typeof T];
-  hf: string;
-  rtlFont: string;
-  Arrow: LucideIcon;
-}) {
-  const { book, rating, w, hf, rtlFont, Arrow } = props;
-  const from = minPrice(book);
-  return (
-    <section dir={w.dir} className={`mx-auto max-w-6xl px-4 pt-10 ${rtlFont}`}>
-      <Reveal>
-        <div className="relative isolate overflow-hidden rounded-3xl border bg-card p-6 shadow-book sm:p-10">
-          {book.coverUrl ? (
-            <img
-              aria-hidden
-              alt=""
-              src={book.coverUrl}
-              className="absolute inset-0 -z-10 h-full w-full scale-125 object-cover opacity-25 blur-3xl"
-            />
-          ) : (
-            <div
-              aria-hidden
-              className="absolute inset-0 -z-10 blur-3xl"
-              style={{ background: "color-mix(in oklab, var(--primary) 25%, transparent)" }}
-            />
-          )}
-          <div className="grid items-center gap-8 md:grid-cols-[auto_1fr]">
-            <Link to="/books/$id" params={{ id: book.id }} className="group mx-auto block w-48 sm:w-60">
-              <Book3D book={book} hint={w.view} />
-            </Link>
-            <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border bg-card/80 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
-                <Sparkles className="h-3.5 w-3.5" />
-                {w.spotlight}
-              </span>
-              <h2 className={`mt-4 text-3xl leading-tight sm:text-4xl ${hf}`}>{book.title}</h2>
-              <p className="mt-1.5 text-muted-foreground">{book.author}</p>
-              {rating && (
-                <p className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Stars value={rating.avg} size={16} /> {rating.avg.toFixed(1)} ({rating.count})
-                </p>
-              )}
-              <p className="mt-3 text-lg font-semibold">
-                {from === 0 ? (
-                  <span className="text-primary">Free PDF · وړیا</span>
-                ) : (
-                  <>
-                    {w.from} {fmtAfn(from)} <span className="text-sm font-normal text-muted-foreground">· {fmtUsd(from)}</span>
-                  </>
-                )}
-              </p>
-              <div className="mt-3">
-                <FormatBadges book={book} />
-              </div>
-              <Link
-                to="/books/$id"
-                params={{ id: book.id }}
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground shadow-book transition hover:opacity-90 active:scale-95"
-              >
-                {w.view}
-                <Arrow className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </Reveal>
-    </section>
-  );
-}
-
 /* ───────────────────────── page ───────────────────────── */
 
 function Index() {
@@ -669,22 +381,9 @@ function Index() {
   }, [books, ratings]);
   const freeBooks = useMemo(() => books.filter((b) => minPrice(b) === 0), [books]);
   const heroBooks = featured.slice(0, 3);
-  const spot = featured[0];
 
   const goBooks = () => document.getElementById("books")?.scrollIntoView({ behavior: "smooth", block: "start" });
   const fmtLabels = { all: w.fmt[0], hard: w.fmt[1], soft: w.fmt[2] } as const;
-
-  const card = (b: Book, i: number, shelf = false) => (
-    <BookCard
-      book={b}
-      rating={ratings[b.id]}
-      fromLabel={w.from}
-      viewLabel={w.view}
-      freeLabel={w.freeBadge}
-      index={i}
-      shelf={shelf}
-    />
-  );
 
   return (
     <div>
@@ -865,9 +564,6 @@ function Index() {
         </section>
       )}
 
-      {/* ── book spotlight ── */}
-      {spot && <Spotlight book={spot} rating={ratings[spot.id]} w={w} hf={hf} rtlFont={rtlFont} Arrow={Arrow} />}
-
       {/* ── free books ── */}
       {freeBooks.length > 0 && (
         <section id="free" dir={w.dir} className={`mx-auto max-w-6xl scroll-mt-4 px-4 pt-10 ${rtlFont}`}>
@@ -880,10 +576,10 @@ function Index() {
               <Gift aria-hidden className="h-14 w-14 shrink-0 opacity-30 sm:h-20 sm:w-20" />
             </div>
           </Reveal>
-          <div dir={w.dir} className="lnv-row -mx-4 mt-5 flex snap-x gap-4 overflow-x-auto px-4 pb-4 pt-3">
-            {freeBooks.slice(0, 10).map((b, i) => (
+          <div dir={w.dir} className="lnv-row -mx-4 mt-5 flex snap-x gap-4 overflow-x-auto px-4 pb-3">
+            {freeBooks.slice(0, 10).map((b) => (
               <div key={b.id} className="w-36 shrink-0 snap-start sm:w-44">
-                {card(b, i, true)}
+                <BookCard book={b} rating={ratings[b.id]} fromLabel={w.from} />
               </div>
             ))}
           </div>
@@ -896,10 +592,10 @@ function Index() {
           <Reveal>
             <SectionTitle title={w.featTitle} sub={w.featSub} hf={hf} />
           </Reveal>
-          <div dir={w.dir} className="lnv-row -mx-4 mt-5 flex snap-x gap-4 overflow-x-auto px-4 pb-4 pt-3">
-            {featured.map((b, i) => (
+          <div dir={w.dir} className="lnv-row -mx-4 mt-5 flex snap-x gap-4 overflow-x-auto px-4 pb-3">
+            {featured.map((b) => (
               <div key={b.id} className="w-36 shrink-0 snap-start sm:w-44">
-                {card(b, i, true)}
+                <BookCard book={b} rating={ratings[b.id]} fromLabel={w.from} />
               </div>
             ))}
           </div>
@@ -970,9 +666,9 @@ function Index() {
           ))}
         </div>
 
-        <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-12 sm:grid-cols-3 lg:grid-cols-4">
-          {list.map((b, i) => (
-            <div key={b.id}>{card(b, i % 8)}</div>
+        <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
+          {list.map((b) => (
+            <BookCard key={b.id} book={b} rating={ratings[b.id]} fromLabel={w.from} />
           ))}
         </div>
         {list.length === 0 && (
@@ -1089,20 +785,21 @@ function Index() {
   );
 }
 
-function BookCard(props: {
+function BookCard({
+  book,
+  rating,
+  fromLabel,
+}: {
   book: Book;
   rating?: { avg: number; count: number } | undefined;
   fromLabel: string;
-  viewLabel: string;
-  freeLabel: string;
-  index?: number;
-  shelf?: boolean;
 }) {
-  const { book, rating, fromLabel, viewLabel, freeLabel, index = 0, shelf = false } = props;
   const from = minPrice(book);
   return (
     <Link to="/books/$id" params={{ id: book.id }} className="group block">
-      <Book3D book={book} index={index} shelf={shelf} badge={from === 0 ? freeLabel : undefined} hint={viewLabel} />
+      <div className="transition-transform duration-300 group-hover:-translate-y-1.5 group-hover:drop-shadow-xl">
+        <BookCover book={book} />
+      </div>
       <div className="mt-3 space-y-1.5">
         <h3 className="font-display text-base leading-snug">{book.title}</h3>
         <p className="text-xs text-muted-foreground">{book.author}</p>
@@ -1122,4 +819,4 @@ function BookCard(props: {
       </div>
     </Link>
   );
-  }
+    }
