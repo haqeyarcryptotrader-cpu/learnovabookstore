@@ -547,21 +547,16 @@ function Index() {
           <Reveal>
             <SectionTitle title={w.catTitle} sub={w.catSub} hf={hf} />
           </Reveal>
-          <div dir={w.dir} className="lnv-row -mx-4 mt-5 flex snap-x gap-3 overflow-x-auto px-4 pb-3">
-            {CATEGORIES.map((c, i) => (
-              <button
-                key={c}
-                onClick={() => {
-                  setCat(c);
-                  goBooks();
-                }}
-                className={`${COVERS[i % COVERS.length]} relative h-24 w-40 shrink-0 snap-start overflow-hidden rounded-2xl p-4 text-start font-semibold shadow-book transition hover:-translate-y-1 active:scale-95`}
-              >
-                <BookOpen aria-hidden className="absolute -bottom-3 end-2 h-16 w-16 opacity-20" />
-                <span className="relative flex h-full items-end text-sm leading-snug">{c}</span>
-              </button>
-            ))}
-          </div>
+          <CategoryTiles
+  categories={CATEGORIES}
+  lang={lang}
+  active={cat}
+  countLabel={w.countSuffix}
+  onPick={(c) => {
+    setCat(c);
+    goBooks();
+  }}
+/>
         </section>
       )}
 
