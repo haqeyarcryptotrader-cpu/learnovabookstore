@@ -1,3 +1,4 @@
+import { CategoryTiles } from "@/components/CategoryTiles";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { usePersistentState } from "@/hooks/use-persistent-state";
 import { useEffect, useMemo, useRef, useState } from "react";
