@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeCategory, type Book } from "./books";
+import { getStoredReferral } from "./referral";
 
 type Row = {
   id: string; title: string; author: string; category: string;
@@ -48,7 +49,9 @@ export interface OrderInput {
 
 export async function recordOrder(o: OrderInput) {
   const { data: { session } } = await supabase.auth.getSession();
-  const { error } = await supabase.from("orders").insert({ ...o, user_id: session?.user.id ?? null });
+  const ref = getStoredReferral();
+  const payload = { ...o, user_id: session?.user.id ?? null, ...(ref ? { referral_code: ref } : {}) };
+  const { error } = await supabase.from("orders").insert(payload);
   if (error) console.error("Order not saved", error);
 }
 
