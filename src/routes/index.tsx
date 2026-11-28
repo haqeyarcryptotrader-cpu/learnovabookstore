@@ -537,7 +537,7 @@ function Index() {
           )}
         </div>
       </section>
-
+      <ReferralBanner lang={lang} />
       <PostBar className="mx-auto max-w-6xl px-4 pt-6" />
       <QuickLinks />
 
