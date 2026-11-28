@@ -321,11 +321,12 @@ function Admin({ email }: { email: string }) {
           {tabBtn("posts", "Posts / پوسټونه")}
           {tabBtn("stamp", "Stamp PDF / مهر")}
           {tabBtn("unlock", "Unlock PDF / خلاصول")}
+          {tabBtn("referrals", "Referrals / ملګري")}.
           <button onClick={() => supabase.auth.signOut()} className="inline-flex items-center gap-1 rounded-md border px-4 py-2 text-sm"><LogOut className="h-4 w-4" /> Sign out</button>
         </div>
       </div>
 
-      {tab === "orders" ? <Orders /> : tab === "stamp" ? <StampTool /> : tab === "unlock" ? <UnlockTool /> : tab === "posts" ? <PostReview /> : (
+      {tab === "orders" ? <Orders /> : tab === "stamp" ? <StampTool /> : tab === "unlock" ? <UnlockTool /> :  tab === "posts" ? <PostReview /> tab === "referrals" ? <ReferralAdmin /> :): (
         <>
           <div className="mt-6 flex justify-end">
             <button onClick={() => setEdit({ ...empty })} className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"><Plus className="h-4 w-4" /> Add book</button>
