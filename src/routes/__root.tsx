@@ -16,7 +16,7 @@ import { StoreProvider } from "@/lib/store";
 import { Header } from "@/components/Header";
 import { CartSheet } from "@/components/CartSheet";
 import { Toaster } from "@/components/ui/sonner";
-
+import { captureReferral } from "@/lib/referral";
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
