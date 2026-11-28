@@ -303,7 +303,7 @@ function Orders() {
 function Admin({ email }: { email: string }) {
   const { books, saveBook, deleteBook } = useStore();
   const [edit, setEdit] = usePersistentState<Book | null>("lnv-edit", null);
-  const [tab, setTab] = usePersistentState<"books" | "orders" | "stamp" | "posts" | "unlock">("lnv-tab", "books");
+  const [tab, setTab] = usePersistentState<"books" | "orders" | "stamp" | "posts" | "referrals" | "unlock">("lnv-tab", "books");
 
   const tabBtn = (t: typeof tab, label: string) => (
     <button onClick={() => setTab(t)} className={`rounded-md px-4 py-2 text-sm ${tab === t ? "bg-primary text-primary-foreground" : "border"}`}>{label}</button>
