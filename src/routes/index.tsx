@@ -47,7 +47,7 @@ export const Route = createFileRoute("/")({
 const T = {
   en: {
     dir: "ltr",
-    announce: "Invite a friend and get 5% off",
+    announce: "Refer friends and earn 20% of every purchase",
     badge: "Afghan Online Bookstore",
     title: "Welcome to Learnova Books",
     sub: "Hard copies delivered across Afghanistan · Instant PDF soft copies",
@@ -96,7 +96,7 @@ const T = {
   },
   fa: {
     dir: "rtl",
-    announce: "دوستی را دعوت کنید و ۵٪ تخفیف بگیرید",
+    announce: "دوستان را دعوت کنید و ۲۰٪ از هر خرید را کمایی کنید",
     badge: "کتاب‌فروشی آنلاین افغانستان",
     title: "به کتاب‌فروشی لرنووا خوش آمدید",
     sub: "ارسال کتاب چاپی به سراسر افغانستان · نسخه دیجیتال PDF فوری",
@@ -145,7 +145,7 @@ const T = {
   },
   ps: {
     dir: "rtl",
-    announce: "ملګری راوبلئ او ۵٪ تخفیف ترلاسه کړئ",
+    announce: "ملګري راوبولئ او د هر پېر ۲۰٪ ګټه وکړئ",
     badge: "د افغانستان آنلاین کتاب پلورنځی",
     title: "لرنووا کتاب پلورنځي ته ښه راغلاست",
     sub: "چاپي کتابونه په ټول افغانستان کې · فوري PDF ډیجیټل نسخه",
