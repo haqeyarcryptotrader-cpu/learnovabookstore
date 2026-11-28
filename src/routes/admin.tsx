@@ -9,6 +9,7 @@ import { CATEGORIES, fmtAfn, fmtUsd, normalizeCategory, type Book } from "@/lib/
 import { useStore } from "@/lib/store";
 import { BookCover } from "@/components/BookCover";
 import { stampPdf } from "@/lib/watermark";
+import { ReferralAdmin } from "@/components/ReferralAdmin";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
