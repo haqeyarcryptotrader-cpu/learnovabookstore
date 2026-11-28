@@ -327,7 +327,7 @@ function Admin({ email }: { email: string }) {
         </div>
       </div>
 
-      {tab === "orders" ? <Orders /> : tab === "stamp" ? <StampTool /> : tab === "unlock" ? <UnlockTool /> :  tab === "posts" ? <PostReview /> tab === "referrals" ? <ReferralAdmin /> :): (
+      {tab === "orders" ? <Orders /> : tab === "stamp" ? <StampTool /> : tab === "unlock" ? <UnlockTool /> :  tab === "posts" ? <PostReview /> : tab === "referrals" ? <ReferralAdmin /> : (
         <>
           <div className="mt-6 flex justify-end">
             <button onClick={() => setEdit({ ...empty })} className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"><Plus className="h-4 w-4" /> Add book</button>
