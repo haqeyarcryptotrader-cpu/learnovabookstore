@@ -5,6 +5,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { CITIES, fmtAfn } from "@/lib/books";
 import { fetchMyOrders, fetchMyProfile, saveMyProfile, type Profile } from "@/lib/db";
+import { ReferralCard } from "@/components/ReferralCard";
 
 export const Route = createFileRoute("/account")({
   ssr: false,
