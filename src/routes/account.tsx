@@ -164,7 +164,7 @@ function Dashboard({ email }: { email: string }) {
           </>
         )}
       </form>
-
+<ReferralCard />
       <div className="rounded-xl border bg-card p-5">
         <h2 className="font-display text-xl">My orders / زما ارډرونه</h2>
         {orders.length === 0 ? (
